@@ -1,0 +1,21 @@
+{
+  "name": "@acsl/ge-center",
+  "version": "1.0.0",
+  "description": "ACSL-GE Center-Server",
+  "author": "AngelAsuka",
+  "license": "MIT",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "rm -fr ./dist && tsc -p tsconfig.json"
+  },
+  "bin": {
+    "acsl-ge-center": "./dist/index.js"
+  },
+  "bugs": {
+    "url": "https://github.com/Angel-Asuka/acsl-ge/issues"
+  },
+  "homepage": "https://github.com/Angel-Asuka/acsl-ge#readme",
+  "dependencies": {
+    "@acsl/fw": "^1.2.6"
+  }
+}
