@@ -1,8 +1,11 @@
 import fs from 'node:fs'
-import {Service} from '../src/service.js'
+import {ServiceNode} from '../src/service.js'
 
-const svc = new Service({
-    CenterPath: 'ws://127.0.0.1:11800/ws',
-    AuthId: '0',
-    Key: fs.readFileSync('../../test/test.pem').toString()
+const svc = new ServiceNode({
+    center_path: 'ws://127.0.0.1:11800/ws',
+    auth_id: '0',
+    key: fs.readFileSync('../../test/test.pem').toString(),
+    service: 'app:container',
+    apps: ['ox2'],
+    capacity: 1024
 })
