@@ -1,7 +1,7 @@
 {
-  "name": "@acsl/ge-center-sdk",
+  "name": "@acsl/ge-sdk",
   "version": "1.0.0",
-  "description": "ACSL-GE Center-Server",
+  "description": "ACSL-GE Service Development Kit",
   "author": "AngelAsuka",
   "license": "MIT",
   "type": "module",
