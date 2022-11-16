@@ -1,4 +1,5 @@
 import fs from 'node:fs'
+import path from 'node:path'
 import {Crypto} from '@acsl/fw'
 
 declare type Cert = {
@@ -27,6 +28,7 @@ export default class CertDB {
         }catch(e){
             this.mykey = ''
             console.log(`Can not load private key from ${key}`)
+
         }
     }
 
