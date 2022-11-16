@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/Angel-Asuka/acsl-ge#readme",
   "dependencies": {
-    "@acsl/fw": "^1.2.10"
+    "@acsl/fw": "^1.2.10",
+    "yaml": "^2.1.3"
   }
 }

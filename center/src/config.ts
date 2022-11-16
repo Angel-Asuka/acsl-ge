@@ -1,6 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { App, Utils } from '@acsl/fw'
+import YAML from 'yaml';
 
 const cmd = Utils.parseArgv({'-c': 'ConfigureFile'},{}) 
 
@@ -16,7 +17,7 @@ export const coreConfig = {
 
 try{
     const pth = path.dirname(cmd.ConfigureFile) + '/'
-    const cfg = JSON.parse(fs.readFileSync(cmd.ConfigureFile).toString())
+    const cfg = YAML.parse(fs.readFileSync(cmd.ConfigureFile).toString())
     if(cfg["listen-port"]) appConfig.port = cfg["listen-port"]
     if(cfg["service-path"]) coreConfig.ServicePath = ((cfg["service-path"][0]=='.')?pth:'') + cfg["service-path"]
     if(cfg["certs-path"]) coreConfig.CertPath = ((cfg["certs-path"][0]=='.')?pth:'') + cfg["certs-path"]
