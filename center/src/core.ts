@@ -133,6 +133,7 @@ export class Core{
                                 this.svc_map[svc.service][svc.uuid] = svc
                             }
                         }
+                        console.log(`Client connected from ${conn.clientAddress}`)
                         this.auth_timer.remove(conn.auth_timout_id)
                         replay.status = 'OK'
                         conn.send(Buffer.from(JSON.stringify({cmd:'auth',data:replay})))

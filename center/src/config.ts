@@ -17,9 +17,10 @@ export const coreConfig = {
 try{
     const pth = path.dirname(cmd.ConfigureFile) + '/'
     const cfg = JSON.parse(fs.readFileSync(cmd.ConfigureFile).toString())
-    if(cfg.ServicePath) coreConfig.ServicePath = ((cfg.ServicePath[0]=='.')?pth:'') + cfg.ServicePath
-    if(cfg.CertPath) coreConfig.CertPath = ((cfg.CertPath[0]=='.')?pth:'') + cfg.CertPath
-    if(cfg.Key) coreConfig.Key = ((cfg.Key[0]=='.')?pth:'') + cfg.Key
+    if(cfg["listen-port"]) appConfig.port = cfg["listen-port"]
+    if(cfg["service-path"]) coreConfig.ServicePath = ((cfg["service-path"][0]=='.')?pth:'') + cfg["service-path"]
+    if(cfg["certs-path"]) coreConfig.CertPath = ((cfg["certs-path"][0]=='.')?pth:'') + cfg["certs-path"]
+    if(cfg["key"]) coreConfig.Key = ((cfg["key"][0]=='.')?pth:'') + cfg["key"]
 }catch(e){}
 
 coreConfig.CertPath = path.resolve(coreConfig.CertPath)
