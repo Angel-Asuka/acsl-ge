@@ -1,6 +1,6 @@
 {
   "name": "@acsl/ge-center",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ACSL-GE Center-Server",
   "author": "AngelAsuka",
   "license": "MIT",
@@ -17,6 +17,12 @@
   },
   "homepage": "https://github.com/Angel-Asuka/acsl-ge#readme",
   "dependencies": {
-    "@acsl/fw": "^1.2.6"
+    "@acsl/fw": "^1.2.10",
+    "yaml": "^2.1.3"
+  },
+  "devDependencies": {
+    "@types/mysql": "^2.15.21",
+    "@types/node": "^18.11.9",
+    "@types/ws": "^8.5.3"
   }
 }

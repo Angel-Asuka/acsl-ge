@@ -2,3 +2,5 @@ center/dist
 node_modules
 package-lock.json
 /center-sdk/out
+/sdk/out
+/sdk/lib

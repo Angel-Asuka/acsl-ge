@@ -1,5 +1,7 @@
 import fs from 'node:fs'
+import path from 'node:path'
 import {Crypto} from '@acsl/fw'
+import YAML from 'yaml';
 
 declare type Cert = {
     id:string,
@@ -27,6 +29,7 @@ export default class CertDB {
         }catch(e){
             this.mykey = ''
             console.log(`Can not load private key from ${key}`)
+
         }
     }
 
@@ -37,7 +40,7 @@ export default class CertDB {
             const crt:Cert = {
                 id: id,
                 cert: fs.readFileSync(`${this.path}${id}.pem`).toString(),
-                cfg: JSON.parse(fs.readFileSync(`${this.path}${id}.json`).toString())
+                cfg: YAML.parse(fs.readFileSync(`${this.path}${id}.yml`).toString())
             }
             this.certs[id] = crt
             return crt

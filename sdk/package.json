@@ -1,7 +1,7 @@
 {
-  "name": "@acsl/ge-center-sdk",
-  "version": "1.0.0",
-  "description": "ACSL-GE Center-Server",
+  "name": "@acsl/ge-sdk",
+  "version": "1.0.1",
+  "description": "ACSL-GE Service Development Kit",
   "author": "AngelAsuka",
   "license": "MIT",
   "type": "module",
@@ -16,6 +16,11 @@
   },
   "homepage": "https://github.com/Angel-Asuka/acsl-ge#readme",
   "dependencies": {
-    "@acsl/fw": "^1.2.6"
+    "@acsl/fw": "^1.2.10"
+  },
+  "devDependencies": {
+    "@types/mysql": "^2.15.21",
+    "@types/node": "^18.11.9",
+    "@types/ws": "^8.5.3"
   }
 }
