@@ -1,1 +1,9 @@
-FROM node:19-alpine AS build
+FROM nginx:1.23.2 AS buildcert
+RUN openssl genrsa -out /key.pem 2048 && openssl rsa -in /key.pem -pubout -out /pub.pem
+
+FROM node:19-alpine
+WORKDIR /etc/ge-center
+COPY --from=buildcert /key.pem ./private.key
+COPY --from=buildcert /pub.pem ./pub.pem
+RUN mkdir auth && npm install --global @acsl/ge-center@1.0.1
+ENTRYPOINT [ "acsl-ge-center" ]
