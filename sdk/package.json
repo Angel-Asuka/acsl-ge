@@ -1,0 +1,26 @@
+{
+  "name": "@acsl/ge-sdk",
+  "version": "1.0.1",
+  "description": "ACSL-GE Service Development Kit",
+  "author": "AngelAsuka",
+  "license": "MIT",
+  "type": "module",
+  "main": "./lib/service.js",
+  "types": "./lib/service.d.ts",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "rm -fr ./dist && tsc -p tsconfig.json"
+  },
+  "bugs": {
+    "url": "https://github.com/Angel-Asuka/acsl-ge/issues"
+  },
+  "homepage": "https://github.com/Angel-Asuka/acsl-ge#readme",
+  "dependencies": {
+    "@acsl/fw": "^1.2.10"
+  },
+  "devDependencies": {
+    "@types/mysql": "^2.15.21",
+    "@types/node": "^18.11.9",
+    "@types/ws": "^8.5.3"
+  }
+}
