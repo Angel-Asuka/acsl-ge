@@ -4,3 +4,5 @@ package-lock.json
 /center-sdk/out
 /sdk/out
 /sdk/lib
+/ge/dist
+/ge/test/dist

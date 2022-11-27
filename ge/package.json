@@ -1,0 +1,21 @@
+{
+    "name": "@acsl/ge",
+    "version": "1.0.0",
+    "type": "module",
+    "description": "ACSL Game Engine",
+    "exports": {
+        ".": "./index.js"
+    },
+    "scripts": {},
+    "author": "AngelAsuka",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^18.11.9"
+    },
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org"
+    },
+    "dependencies": {
+        "gl-matrix": "^3.4.3"
+    }
+}
