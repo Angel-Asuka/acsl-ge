@@ -1,46 +1,46 @@
-import { RenderResource } from "./resource.js"
-import { RenderDevice } from "./device.js"
+import { RenderingResource } from "./resource.js"
+import { RenderingDevice } from "./device.js"
 
-export class Shader extends RenderResource {
+export class Shader extends RenderingResource {
 
-    /** @internal */ ___shader: WebGLShader | null       // WebGL 着色器对象
-    /** @internal */ ___type: number                     // 着色器类型
-    /** @internal */ ___source: string                   // 着色器源码
-    /** @internal */ ___last_err: string                 // 最后一次编译错误信息
+    /** @internal */ _shader: WebGLShader | null       // WebGL 着色器对象
+    /** @internal */ _type: number                     // 着色器类型
+    /** @internal */ _source: string                   // 着色器源码
+    /** @internal */ _last_err: string                 // 最后一次编译错误信息
 
-    constructor(device: RenderDevice, type: number, source: string) {
+    constructor(device: RenderingDevice, type: number, source: string) {
         super(device)
-        this.___shader = null
-        this.___type = type
-        this.___source = source
-        this.___last_err = ''
-        this.___onDeviceRestored()
+        this._shader = null
+        this._type = type
+        this._source = source
+        this._last_err = ''
+        this._onDeviceRestored()
     }
 
     // 获取 Shader 是否就绪
-    get ready(): boolean { return this.___shader != null }
+    get ready(): boolean { return this._shader != null }
 
     // 内部方法，设备丢失时调用
-    /** @internal */ ___onDeviceLost() {
-        if(this.___shader){
-            const ctx = this.___device.___ctx
-            ctx.deleteShader(this.___shader)
-            this.___shader = null
+    /** @internal */ _onDeviceLost() {
+        if(this._shader){
+            const ctx = this._device._ctx
+            ctx.deleteShader(this._shader)
+            this._shader = null
         }
     }
 
     // 内部方法，设备恢复时调用
-    /** @internal */ ___onDeviceRestored() {
-        if(!this.___shader){
-            const ctx = this.___device.___ctx
-            this.___shader = ctx.createShader(this.___type)
-            if(this.___shader){
-                ctx.shaderSource(this.___shader, this.___source)
-                ctx.compileShader(this.___shader)
-                if (!ctx.getShaderParameter(this.___shader, ctx.COMPILE_STATUS)) {
-                    this.___last_err = ctx.getShaderInfoLog(this.___shader) || ''
-                    ctx.deleteShader(this.___shader)
-                    this.___shader = null
+    /** @internal */ _onDeviceRestored() {
+        if(!this._shader){
+            const ctx = this._device._ctx
+            this._shader = ctx.createShader(this._type)
+            if(this._shader){
+                ctx.shaderSource(this._shader, this._source)
+                ctx.compileShader(this._shader)
+                if (!ctx.getShaderParameter(this._shader, ctx.COMPILE_STATUS)) {
+                    this._last_err = ctx.getShaderInfoLog(this._shader) || ''
+                    ctx.deleteShader(this._shader)
+                    this._shader = null
                 }
             }
         }

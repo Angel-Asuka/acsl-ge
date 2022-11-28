@@ -1,4 +1,4 @@
-import {RenderDevice} from './render/device.js'
+import {RenderingDevice} from './render/device.js'
 
 const kRender = Symbol()
 const kOnFrame = Symbol()
@@ -9,11 +9,11 @@ declare type FrameCallBackFunction = ()=>void
 
 export class Core {
 
-    /** @internal */ private [kRender]:RenderDevice
+    /** @internal */ private [kRender]:RenderingDevice
     /** @internal */ private [kRunning]:boolean
     /** @internal */ private [kFrameCallBack]:FrameCallBackFunction
 
-    constructor(g:RenderDevice){
+    constructor(g:RenderingDevice){
         this[kRunning] = false
         this[kRender] = g
         this[kFrameCallBack] = ()=>{}

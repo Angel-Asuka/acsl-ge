@@ -1,4 +1,4 @@
-import { GameObject, GameObjectType } from "./game-object"
+import { GameObject, GameObjectType } from "./game-object.js"
 
 export class Image extends GameObject {
     constructor() {

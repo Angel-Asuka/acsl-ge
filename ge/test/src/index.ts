@@ -1,18 +1,18 @@
 import './index.css'
 import './thor.jpg'
 
-import {Core, RenderDevice, Program, Matrix4} from '../../dist'
-import { VertexAttributeUsage, VertexAttributeType, VertexBuffer } from '../../dist/render/vertex-buffer'
+import * as Ge from '../../dist'
 
 const canvas = document.createElement('canvas')
 canvas.width = 640
 canvas.height = 480
 document.body.appendChild(canvas)
 
-const g = RenderDevice.fromCanvas(canvas)
+const g = Ge.RenderingDevice.fromCanvas(canvas)
 if(g){
-    const c = new Core(g)
+    const c = new Ge.Core(g)
 
+    //#region RES
     const vsSource = `
     attribute vec4 aVertexPosition;
     attribute vec4 aVertexColor;
@@ -39,21 +39,20 @@ if(g){
     void main() {
         gl_FragColor = vColor * 0.2 + texture2D(uSampler, vTexCoord);
     }`
+    //#endregion
 
     const p = g.createProgram(vsSource, fsSource, {
-        aVertexPosition: VertexAttributeUsage.POSITION,
-        aVertexColor: VertexAttributeUsage.COLOR,
-        aTexCoord: VertexAttributeUsage.TEXCOORD_0
+        aVertexPosition: Ge.VertexAttributeUsage.POSITION,
+        aVertexColor: Ge.VertexAttributeUsage.COLOR,
+        aTexCoord: Ge.VertexAttributeUsage.TEXCOORD_0
     })
 
-    const vertex_position = p.getAttributeLocation('aVertexPosition')
-    const color_position = p.getAttributeLocation('aVertexColor')
-    const uv_position = p.getAttributeLocation('aTexCoord')
     const p_matrix = p.getUniformLocation('uProjectionMatrix')
     const mv_matrix = p.getUniformLocation('uModelViewMatrix')
 
     const gl = g.context
 
+    //#region RES
     const positions = [
         // Front face
         -1.0, -1.0,  1.0, 
@@ -149,26 +148,48 @@ if(g){
         20, 21, 22,     20, 22, 23    // left
     ]
 
-    const vertex_data = VertexBuffer.mergeComponents([
-        {usage: VertexAttributeUsage.POSITION, buffer:new Float32Array(positions).buffer, type: VertexAttributeType.FLOAT, size: 3, normalized: false},
-        {usage: VertexAttributeUsage.COLOR, buffer:new Float32Array(colors).buffer, type: VertexAttributeType.FLOAT, size: 4, normalized: false},
-        {usage: VertexAttributeUsage.TEXCOORD_0, buffer:new Float32Array(uv).buffer, type: VertexAttributeType.FLOAT, size: 2, normalized: false}
+    //#endregion
+
+    const vertex_data = Ge.VertexBuffer.mergeComponents([
+        {usage: Ge.VertexAttributeUsage.POSITION, buffer:new Float32Array(positions).buffer, type: Ge.VertexAttributeType.FLOAT, size: 3, normalized: false},
+        {usage: Ge.VertexAttributeUsage.COLOR, buffer:new Float32Array(colors).buffer, type: Ge.VertexAttributeType.FLOAT, size: 4, normalized: false},
+        {usage: Ge.VertexAttributeUsage.TEXCOORD_0, buffer:new Float32Array(uv).buffer, type: Ge.VertexAttributeType.FLOAT, size: 2, normalized: false}
     ])
 
     const vertex_buffer = g.createVertexBuffer(...vertex_data)
     const index_buffer = g.createIndexBuffer(new Uint16Array(cubeIndices).buffer)
 
-    const img = new Image()
-    img.crossOrigin = 'anonymous'
-    await new Promise(r=>{img.onload = r; img.src = './thor.jpg'})
+    console.log(vertex_data)
+    
 
-    const texture = g.createTextureFromImage(img)
+    console.log('createing res')
+    const res = new Ge.ResourceManager([
+        {name: 'texture', type: Ge.ResourceType.Image, uri: './thor.jpg'},
+        {name: 'texture1', type: Ge.ResourceType.Image, uri: './thor1.jpg'},
+        {name: 'texture2', type: Ge.ResourceType.Image, uri: './thor2.jpg'},
+        {name: 'texture3', type: Ge.ResourceType.Image, uri: './thor3.jpg'},
+        {name: 'texture4', type: Ge.ResourceType.Image, uri: './thor4.jpg'},
+        {name: 'texture5', type: Ge.ResourceType.Image, uri: './thor5.jpg'},
+        {name: 'texture6', type: Ge.ResourceType.Image, uri: './thor6.jpg'}
+    ])
 
-    const mat_proj = new Matrix4()
+    res.onComplete = () => {console.log('Complete')}
+    res.onError = (idx:number, res:Ge.Resource) => {console.log('Error', idx, res); return 'ignore'}
+    res.onProgress = (pg:number, total:number) => {console.log('Progress', pg, total)}
+
+    console.log('befor --- load')
+    res.load()
+    console.log('after --- load')
+    await res.wait()
+    console.log('load --- finished')
+
+    const mat_proj = new Ge.Matrix4()
+    const mat_view = new Ge.Matrix4()
     mat_proj.perspective(45 * Math.PI / 180, 640/ 480, 0.1, 100)
-    console.log(mat_proj)
+    mat_view.lookAt([0, 3, 3], [0, 0, 0], [0, 1, 0])
+    mat_proj.multiply(mat_view)
 
-    const mat_mv = new Matrix4()
+    const mat_mv = new Ge.Matrix4()
     mat_mv.translate([0, 0, -6])
     console.log(mat_mv)
 
@@ -179,8 +200,8 @@ if(g){
         const dt = Date.now() - ts0
         
         mat_mv.identity()
-        mat_mv.translate([0, 0, -6])
-        mat_mv.rotate( Math.PI * (dt % 20000)/10000.0, [0,1,0.3] )
+        //mat_mv.translate([0, 0, -6])
+        mat_mv.rotate( Math.PI * (dt % 20000)/10000.0, [0,1,0] )
 
 
         gl.clearColor(0.3, 0, 0, 1)
@@ -192,16 +213,21 @@ if(g){
 
         p.activate()
 
-        texture.bind(0)
-        vertex_buffer.activate()
-        index_buffer.activate()
+        const img = res.indexOf(0) as Ge.ImageResource
+        if(img)
+            img.getTexture(g).bind(0)
         
+        //vertex_buffer.activate()
+        //index_buffer.activate()
         
         gl.uniformMatrix4fv(p_matrix, false, mat_proj.data)
         gl.uniformMatrix4fv(mv_matrix, false, mat_mv.data)
 
+        g.stdCone.draw()
+
+
         //gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
-        gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0)
+        //gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0)
 
     }
     c.activate()

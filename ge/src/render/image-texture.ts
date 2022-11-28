@@ -1,27 +1,28 @@
-import { RenderDevice } from "./device.js"
+import { RenderingDevice } from "./device.js"
 import { Texture, TextureUsage,  TextureOptions} from "./texture.js"
 
 // 图片纹理
 export class ImageTexture extends Texture {
 
-    /** @internal */ ___img: HTMLImageElement               // 图片资源
+    /** @internal */ _img: HTMLImageElement               // 图片资源
 
-    constructor(dev: RenderDevice, img: HTMLImageElement, options?: TextureOptions) {
+    constructor(dev: RenderingDevice, img: HTMLImageElement, options?: TextureOptions) {
         super(dev, options)
-        this.___img = img
-        this.___onDeviceRestored()
+        this._img = img
+        this._onDeviceRestored()
     }
 
     // 内部方法，资源被渲染设备恢复时调用
-    /** @internal */ ___onDeviceRestored() {
+    /** @internal */ _onDeviceRestored() {
         const ctx = this.device.context
         const { format, dataType } = this.options
-        if (this.___texture == null) {
-            this.___texture = ctx.createTexture()
-            if(this.___texture != null) {
-                ctx.bindTexture(ctx.TEXTURE_2D, this.___texture)
-                ctx.texImage2D(ctx.TEXTURE_2D, 0, format, format, dataType, this.___img)
-                this.___applyOptions()
+        if (this._texture == null) {
+            this._texture = ctx.createTexture()
+            if(this._texture != null) {
+                ctx.bindTexture(ctx.TEXTURE_2D, this._texture)
+                ctx.pixelStorei(ctx.UNPACK_FLIP_Y_WEBGL, this.options.flipY ? 1 : 0)
+                ctx.texImage2D(ctx.TEXTURE_2D, 0, format, format, dataType, this._img)
+                this._applyOptions()
                 ctx.bindTexture(ctx.TEXTURE_2D, null)
             }
         }
@@ -31,8 +32,8 @@ export class ImageTexture extends Texture {
     get usage(): TextureUsage { return TextureUsage.Static }
 
     // 获取纹理宽度
-    get width(): number { return this.___img.width }
+    get width(): number { return this._img.width }
 
     // 获取纹理高度
-    get height(): number { return this.___img.height }
+    get height(): number { return this._img.height }
 }

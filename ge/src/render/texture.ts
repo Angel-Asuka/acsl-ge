@@ -1,5 +1,5 @@
-import { RenderDevice } from "./device.js"
-import { RenderResource } from "./resource.js"
+import { RenderingDevice } from "./device.js"
+import { RenderingResource } from "./resource.js"
 
 // 纹理用途
 export enum TextureUsage {
@@ -18,11 +18,12 @@ export type TextureOptions = {
     wrapS?: number                      // 纹理环绕模式, 默认 gl.CLAMP_TO_EDGE
     wrapT?: number                      // 纹理环绕模式, 默认 gl.CLAMP_TO_EDGE
     anisotropic?: number                // 各向异性过滤级别 默认为 1
+    flipY?: boolean                     // 纹理是否翻转, 默认为 true
 }
 
 // 纹理基类
-export class Texture extends RenderResource{
-    /** @internal */ ___texture: WebGLTexture | null        // 纹理对象
+export class Texture extends RenderingResource{
+    /** @internal */ _texture: WebGLTexture | null        // 纹理对象
     options: {                                              // 纹理选项
         format: number
         dataType: number
@@ -31,11 +32,12 @@ export class Texture extends RenderResource{
         wrapS: number
         wrapT: number
         anisotropic: number
+        flipY: boolean
     }
 
-    constructor(device: RenderDevice, options?: TextureOptions) {
+    constructor(device: RenderingDevice, options?: TextureOptions) {
         super(device)
-        this.___texture = null
+        this._texture = null
         this.options = {
             format: options?.format || device.context.RGBA,
             dataType: options?.dataType || device.context.UNSIGNED_BYTE,
@@ -43,7 +45,8 @@ export class Texture extends RenderResource{
             magFilter: options?.magFilter || device.context.LINEAR,
             wrapS: options?.wrapS || device.context.CLAMP_TO_EDGE,
             wrapT: options?.wrapT || device.context.CLAMP_TO_EDGE,
-            anisotropic: options?.anisotropic || 1
+            anisotropic: options?.anisotropic || 1,
+            flipY: options?.flipY !== undefined ? options?.flipY : true
         }
     }
 
@@ -51,7 +54,7 @@ export class Texture extends RenderResource{
     bind(unit: number) {
         const { context } = this.device
         context.activeTexture(context.TEXTURE0 + unit)
-        context.bindTexture(context.TEXTURE_2D, this.___texture)
+        context.bindTexture(context.TEXTURE_2D, this._texture)
     }
 
     // 获取纹理用途，子类重写
@@ -64,10 +67,10 @@ export class Texture extends RenderResource{
     get height(): number { return 0 }
 
     // 获取纹理是否就绪
-    get ready(): boolean { return this.___texture !== null }
+    get ready(): boolean { return this._texture !== null }
 
     // 内部方法，应用纹理设置
-    /** @internal */ ___applyOptions() {
+    /** @internal */ _applyOptions() {
         const { context } = this.device
         const { format, dataType, minFilter, magFilter, wrapS, wrapT, anisotropic} = this.options
         context.texParameteri(context.TEXTURE_2D, context.TEXTURE_MIN_FILTER, minFilter)
@@ -83,10 +86,10 @@ export class Texture extends RenderResource{
     }
 
     // 内部方法，设备丢失时调用
-    /** @internal */ ___onDeviceLost() {
-        if (this.___texture) {
-            this.device.context.deleteTexture(this.___texture)
-            this.___texture = null
+    /** @internal */ _onDeviceLost() {
+        if (this._texture) {
+            this.device.context.deleteTexture(this._texture)
+            this._texture = null
         }
     }
 }

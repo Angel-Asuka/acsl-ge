@@ -1,4 +1,4 @@
-import { Matrix4 } from "../math/matrix4"
+import { Matrix4 } from "../math/matrix4.js"
 
 export enum GameObjectType {
     Unknown             = 0,        // 未知
@@ -36,7 +36,7 @@ class IdentityGameObject implements IGameObject {
     }
 }
 
-const ___g_identity_game_object = new IdentityGameObject()
+const _g_identity_game_object = new IdentityGameObject()
 
 /**
  * 游戏对象
@@ -58,7 +58,7 @@ export class GameObject implements IGameObject {
     constructor() {
         this.name = 'object'
         this.type = GameObjectType.Unknown
-        this.parent = ___g_identity_game_object
+        this.parent = _g_identity_game_object
         this.first_child = null
         this.last_child = null
         this.previous_sibling = null
@@ -106,7 +106,7 @@ export class GameObject implements IGameObject {
     }
 
     attachFirst(child: GameObject) {
-        if(child.parent !== ___g_identity_game_object)
+        if(child.parent !== _g_identity_game_object)
             child.detach()
         child.parent = this
         child.previous_sibling = null
@@ -119,7 +119,7 @@ export class GameObject implements IGameObject {
     }
 
     attachLast(child: GameObject) {
-        if(child.parent !== ___g_identity_game_object)
+        if(child.parent !== _g_identity_game_object)
             child.detach()
         child.parent = this
         child.previous_sibling = this.last_child
@@ -133,7 +133,7 @@ export class GameObject implements IGameObject {
 
     /** 将当前对象从父对象的树中断开 */
     detach() {
-        if(this.parent === ___g_identity_game_object) return
+        if(this.parent === _g_identity_game_object) return
         const p = this.parent as GameObject
         if(this.previous_sibling)
             this.previous_sibling.next_sibling = this.next_sibling
@@ -143,7 +143,7 @@ export class GameObject implements IGameObject {
             this.next_sibling.previous_sibling = this.previous_sibling
         else
             p.last_child = this.previous_sibling
-        this.parent = ___g_identity_game_object
+        this.parent = _g_identity_game_object
         this.previous_sibling = null
         this.next_sibling = null
     }
@@ -160,8 +160,8 @@ export class GameObject implements IGameObject {
 
     /** 将当前对象从父对象的树中断开，并将其作为兄弟对象的前一个兄弟对象 */
     attachBefore(sibling: GameObject) {
-        if(sibling.parent === ___g_identity_game_object) return
-        if(this.parent !== ___g_identity_game_object) this.detach()
+        if(sibling.parent === _g_identity_game_object) return
+        if(this.parent !== _g_identity_game_object) this.detach()
         const p = sibling.parent as GameObject
         this.parent = p
         this.previous_sibling = sibling.previous_sibling
@@ -175,8 +175,8 @@ export class GameObject implements IGameObject {
 
     /** 将当前对象从父对象的树中断开，并将其作为兄弟对象的后一个兄弟对象 */
     attachAfter(sibling: GameObject) {
-        if(sibling.parent === ___g_identity_game_object) return
-        if(this.parent !== ___g_identity_game_object) this.detach()
+        if(sibling.parent === _g_identity_game_object) return
+        if(this.parent !== _g_identity_game_object) this.detach()
         const p = sibling.parent as GameObject
         this.parent = p
         this.previous_sibling = sibling
@@ -189,7 +189,7 @@ export class GameObject implements IGameObject {
     }
 
     moveFirst(){
-        if(this.parent === ___g_identity_game_object) return
+        if(this.parent === _g_identity_game_object) return
         if(!this.previous_sibling) return
         const p = this.parent as GameObject
         this.previous_sibling.next_sibling = this.next_sibling
@@ -205,7 +205,7 @@ export class GameObject implements IGameObject {
     }
 
     moveLast(){
-        if(this.parent === ___g_identity_game_object) return
+        if(this.parent === _g_identity_game_object) return
         if(!this.next_sibling) return
         const p = this.parent as GameObject
         this.next_sibling.previous_sibling = this.previous_sibling

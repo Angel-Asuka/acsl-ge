@@ -1,5 +1,5 @@
-import { RenderDevice } from "./device.js"
-import { RenderResource } from "./resource.js"
+import { RenderingDevice } from "./device.js"
+import { RenderingResource } from "./resource.js"
 
 export enum MeshPrimitiveType {
     POINTS = 0,

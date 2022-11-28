@@ -1,4 +1,4 @@
-import { RenderDevice } from "./device.js"
+import { RenderingDevice } from "./device.js"
 import { RenderBuffer } from "./buffer.js"
 import { Program } from "./program.js"
 
@@ -64,29 +64,29 @@ export type VertexDataComponent = {
  * 渲染顶点缓冲对象，用于存储顶点数据。
  */
 export class VertexBuffer extends RenderBuffer {
-    /** @internal */ ___stride: number                      // 顶点缓冲对象的步长
-    /** @internal */ ___attributes: VertexAttribute[]       // 顶点缓冲对象的属性
+    /** @internal */ _stride: number                      // 顶点缓冲对象的步长
+    /** @internal */ _attributes: VertexAttribute[]       // 顶点缓冲对象的属性
 
-    constructor(device: RenderDevice, data: ArrayBuffer, stride: number, attributes: VertexAttribute[]) {
+    constructor(device: RenderingDevice, data: ArrayBuffer, stride: number, attributes: VertexAttribute[]) {
         super(device, WebGL2RenderingContext.ARRAY_BUFFER, data, WebGL2RenderingContext.STATIC_DRAW)
-        this.___stride = stride
-        this.___attributes = [...attributes]
+        this._stride = stride
+        this._attributes = [...attributes]
     }
 
     // 获取顶点缓冲对象的步长
-    get stride(): number { return this.___stride }
+    get stride(): number { return this._stride }
 
     // 激活顶点缓冲对象
     activate(){
-        const ctx = this.___device.___ctx
-        const program = this.___device.___current_program
+        const ctx = this._device._ctx
+        const program = this._device._current_program
         if(program){
-            ctx.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this.___buffer)
-            for(const attr of this.___attributes){
-                const location = program.___attribute_usage[attr.usage]
+            ctx.bindBuffer(WebGL2RenderingContext.ARRAY_BUFFER, this._buffer)
+            for(const attr of this._attributes){
+                const location = program._attribute_usage[attr.usage]
                 if(location >= 0){
                     ctx.enableVertexAttribArray(location)
-                    ctx.vertexAttribPointer(location, attr.size, attr.type, attr.normalized, this.___stride, attr.offset)
+                    ctx.vertexAttribPointer(location, attr.size, attr.type, attr.normalized, this._stride, attr.offset)
                 }
             }
         }
