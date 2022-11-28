@@ -145,6 +145,10 @@ export class RenderingDevice {
     createCone(radius:number, height:number, segments:number = 16): StdPrimitive.StdCone { return new StdPrimitive.StdCone(this, radius, height, segments) }
     createPlane(width:number, height:number, segments:number = 16): StdPrimitive.StdPlane { return new StdPrimitive.StdPlane(this, width, height, segments) }
 
+    createMeshFromOBJ(obj: string): StdPrimitive.StdMesh {
+        return StdPrimitive.StdMesh.fromOBJ(this, obj)
+    }
+
     // 内部方法，添加资源
     /** @internal */ _addResource(res: RenderingResource){
         res._index_of_device_resources = this._resource_list.length

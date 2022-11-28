@@ -89,44 +89,159 @@ export class StdMesh extends Drawable {
     }
 
     // 从OBJ文件中加载网格模型
-    static async fromOBJ(device: RenderingDevice, text: string) {
+    static fromOBJ(device: RenderingDevice, text: string) {
         let mesh = new StdMesh(device)
-        let lines = text.split("\r").join("").split("\n")
-        let vertices: Float32Array = new Float32Array(lines.length * 3)
-        let normals: Float32Array = new Float32Array(lines.length * 3)
-        let texcoords: Float32Array = new Float32Array(lines.length * 2)
-        let indices: Uint16Array = new Uint16Array(lines.length * 3)
-        let vertex_count = 0
-        let normal_count = 0
-        let texcoord_count = 0
-        let index_count = 0
-        for (let line of lines) {
-            let tokens = line.split(" ")
-            if (tokens[0] == "v") {
-                vertices[vertex_count * 3 + 0] = parseFloat(tokens[1])
-                vertices[vertex_count * 3 + 1] = parseFloat(tokens[2])
-                vertices[vertex_count * 3 + 2] = parseFloat(tokens[3])
-                vertex_count++
-            } else if (tokens[0] == "vn") {
-                normals[normal_count * 3 + 0] = parseFloat(tokens[1])
-                normals[normal_count * 3 + 1] = parseFloat(tokens[2])
-                normals[normal_count * 3 + 2] = parseFloat(tokens[3])
-                normal_count++
-            } else if (tokens[0] == "vt") {
-                texcoords[texcoord_count * 2 + 0] = parseFloat(tokens[1])
-                texcoords[texcoord_count * 2 + 1] = parseFloat(tokens[2])
-                texcoord_count++
-            } else if (tokens[0] == "f") {
-                let v1 = tokens[1].split("/")
-                let v2 = tokens[2].split("/")
-                let v3 = tokens[3].split("/")
-                indices[index_count * 3 + 0] = parseInt(v1[0]) - 1
-                indices[index_count * 3 + 1] = parseInt(v2[0]) - 1
-                indices[index_count * 3 + 2] = parseInt(v3[0]) - 1
-                index_count++
+
+        // 下面的代码参考自 https://github.com/KhronosGroup/WebGL/blob/main/sdk/demos/webkit/resources/J3DI.js
+        // ---------------------------- begin of code from J3DI.js -----------------------------------
+        // Copyright (C) 2009 Apple Inc. All Rights Reserved.
+
+        const vertexArray = [ ] as any;
+        const normalArray = [ ] as any;
+        const textureArray = [ ] as any;
+        const indexArray = [ ] as any;
+
+        var vertex = [ ] as any;
+        var normal = [ ] as any;
+        var texture = [ ] as any;
+        var facemap = { } as any;
+        var index = 0;
+
+        // This is a map which associates a range of indices with a name
+        // The name comes from the 'g' tag (of the form "g NAME"). Indices
+        // are part of one group until another 'g' tag is seen. If any indices
+        // come before a 'g' tag, it is given the group name "_unnamed"
+        // 'group' is an object whose property names are the group name and
+        // whose value is a 2 element array with [<first index>, <num indices>]
+        var groups = { } as any;
+        var currentGroup = [-1, 0];
+        groups["_unnamed"] = currentGroup;
+
+        var lines = text.split("\n");
+        for (var lineIndex in lines) {
+            var line = lines[lineIndex].replace(/[ \t]+/g, " ").replace(/\s\s*$/, "");
+
+            // ignore comments
+            if (line[0] == "#")
+                continue;
+
+            var array = line.split(" ");
+            if (array[0] == "g") {
+                // new group
+                currentGroup = [indexArray.length, 0];
+                groups[array[1]] = currentGroup;
+            }
+            else if (array[0] == "v") {
+                // vertex
+                vertex.push(parseFloat(array[1]));
+                vertex.push(parseFloat(array[2]));
+                vertex.push(parseFloat(array[3]));
+            }
+            else if (array[0] == "vt") {
+                // normal
+                texture.push(parseFloat(array[1]));
+                texture.push(parseFloat(array[2]));
+            }
+            else if (array[0] == "vn") {
+                // normal
+                normal.push(parseFloat(array[1]));
+                normal.push(parseFloat(array[2]));
+                normal.push(parseFloat(array[3]));
+            }
+            else if (array[0] == "f") {
+                // face
+                if (array.length != 4) {
+                    console.log("*** Error: face '"+line+"' not handled");
+                    continue;
+                }
+
+                for (var i = 1; i < 4; ++i) {
+                    if (!(array[i] in facemap)) {
+                        // add a new entry to the map and arrays
+                        var f = array[i].split("/");
+                        var vtx, nor, tex;
+
+                        if (f.length == 1) {
+                            vtx = parseInt(f[0]) - 1;
+                            nor = vtx;
+                            tex = vtx;
+                        }
+                        else if (f.length = 3) {
+                            vtx = parseInt(f[0]) - 1;
+                            tex = parseInt(f[1]) - 1;
+                            nor = parseInt(f[2]) - 1;
+                        }
+                        else {
+                            console.log("*** Error: did not understand face '"+array[i]+"'");
+                            return mesh;
+                        }
+
+                        // do the vertices
+                        var x = 0;
+                        var y = 0;
+                        var z = 0;
+                        if (vtx * 3 + 2 < vertex.length) {
+                            x = vertex[vtx*3];
+                            y = vertex[vtx*3+1];
+                            z = vertex[vtx*3+2];
+                        }
+                        vertexArray.push(x);
+                        vertexArray.push(y);
+                        vertexArray.push(z);
+
+                        // do the textures
+                        x = 0;
+                        y = 0;
+                        if (tex * 2 + 1 < texture.length) {
+                            x = texture[tex*2];
+                            y = texture[tex*2+1];
+                        }
+                        textureArray.push(x);
+                        textureArray.push(y);
+
+                        // do the normals
+                        x = 0;
+                        y = 0;
+                        z = 1;
+                        if (nor * 3 + 2 < normal.length) {
+                            x = normal[nor*3];
+                            y = normal[nor*3+1];
+                            z = normal[nor*3+2];
+                        }
+                        normalArray.push(x);
+                        normalArray.push(y);
+                        normalArray.push(z);
+
+                        facemap[array[i]] = index++;
+                    }
+
+                    indexArray.push(facemap[array[i]]);
+                    currentGroup[1]++;
+                }
             }
         }
-        mesh.assemble(vertices, indices)
+        // ---------------------------- end of code from J3DI.js ----------------------------
+        // 上面的代码参考自 https://github.com/KhronosGroup/WebGL/blob/main/sdk/demos/webkit/resources/J3DI.js
+        
+
+        // create the final arrays
+        if(vertexArray.length == normalArray.length && vertexArray.length / 3 == textureArray.length / 2) {
+            const vertex_count = vertexArray.length / 3
+            const vertex_buffer = new Float32Array(vertex_count * 8)
+            for(let i = 0; i < vertex_count; ++i){
+                vertex_buffer[i * 8 + 0] = vertexArray[i * 3 + 0]
+                vertex_buffer[i * 8 + 1] = vertexArray[i * 3 + 1]
+                vertex_buffer[i * 8 + 2] = vertexArray[i * 3 + 2]
+                vertex_buffer[i * 8 + 3] = normalArray[i * 3 + 0]
+                vertex_buffer[i * 8 + 4] = normalArray[i * 3 + 1]
+                vertex_buffer[i * 8 + 5] = normalArray[i * 3 + 2]
+                vertex_buffer[i * 8 + 6] = textureArray[i * 2 + 0]
+                vertex_buffer[i * 8 + 7] = textureArray[i * 2 + 1]
+            }
+            mesh.assemble(vertex_buffer, new Uint16Array(indexArray))
+        }else
+            console.log('Vertex count mismatch')
+        
         return mesh
     }
 }

@@ -1,5 +1,6 @@
 import './index.css'
 import './thor.jpg'
+import './teapot.obj'
 
 import * as Ge from '../../dist'
 
@@ -13,6 +14,7 @@ if(g){
     const c = new Ge.Core(g)
 
     //#region RES
+    const objTeapot=``
     const vsSource = `
     attribute vec4 aVertexPosition;
     attribute vec4 aVertexColor;
@@ -165,12 +167,6 @@ if(g){
     console.log('createing res')
     const res = new Ge.ResourceManager([
         {name: 'texture', type: Ge.ResourceType.Image, uri: './thor.jpg'},
-        {name: 'texture1', type: Ge.ResourceType.Image, uri: './thor1.jpg'},
-        {name: 'texture2', type: Ge.ResourceType.Image, uri: './thor2.jpg'},
-        {name: 'texture3', type: Ge.ResourceType.Image, uri: './thor3.jpg'},
-        {name: 'texture4', type: Ge.ResourceType.Image, uri: './thor4.jpg'},
-        {name: 'texture5', type: Ge.ResourceType.Image, uri: './thor5.jpg'},
-        {name: 'texture6', type: Ge.ResourceType.Image, uri: './thor6.jpg'}
     ])
 
     res.onComplete = () => {console.log('Complete')}
@@ -183,10 +179,14 @@ if(g){
     await res.wait()
     console.log('load --- finished')
 
+    const r = await fetch('./teapot.obj')
+    const teapot = await r.text()
+    const teapot_obj = g.createMeshFromOBJ(teapot)
+
     const mat_proj = new Ge.Matrix4()
     const mat_view = new Ge.Matrix4()
     mat_proj.perspective(45 * Math.PI / 180, 640/ 480, 0.1, 100)
-    mat_view.lookAt([0, 3, 3], [0, 0, 0], [0, 1, 0])
+    mat_view.lookAt([0, 20, 30], [0, 0, 0], [0, 1, 0])
     mat_proj.multiply(mat_view)
 
     const mat_mv = new Ge.Matrix4()
@@ -223,7 +223,7 @@ if(g){
         gl.uniformMatrix4fv(p_matrix, false, mat_proj.data)
         gl.uniformMatrix4fv(mv_matrix, false, mat_mv.data)
 
-        g.stdCone.draw()
+        teapot_obj.draw()
 
 
         //gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
