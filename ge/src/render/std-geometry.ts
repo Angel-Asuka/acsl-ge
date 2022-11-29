@@ -3,8 +3,6 @@ import { Drawable } from "./drawable.js";
 import { IndexBuffer } from "./index-buffer.js";
 import { VertexAttributeType, VertexAttributeUsage, VertexBuffer, VertexAttribute} from "./vertex-buffer.js";
 
-const thickness = 0.3;      // 线宽
-
 // 标准几何体 - 三角形
 export class StdTriangle extends Drawable {
 
@@ -59,6 +57,7 @@ export class StdRectangle extends Drawable {
 }
 
 // 标准网格模型
+
 // 标准网格模型要求的顶点格式为： 位置(3)、法向量(3)、纹理坐标(2)
 export class StdMesh extends Drawable {
     /** @internal */ _vertex_buffer: VertexBuffer | null = null

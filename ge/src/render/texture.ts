@@ -18,7 +18,7 @@ export type TextureOptions = {
     wrapS?: number                      // 纹理环绕模式, 默认 gl.CLAMP_TO_EDGE
     wrapT?: number                      // 纹理环绕模式, 默认 gl.CLAMP_TO_EDGE
     anisotropic?: number                // 各向异性过滤级别 默认为 1
-    flipY?: boolean                     // 纹理是否翻转, 默认为 true
+    flipY?: boolean                     // 纹理是否翻转, 默认为 false
 }
 
 // 纹理基类
@@ -46,7 +46,7 @@ export class Texture extends RenderingResource{
             wrapS: options?.wrapS || device.context.CLAMP_TO_EDGE,
             wrapT: options?.wrapT || device.context.CLAMP_TO_EDGE,
             anisotropic: options?.anisotropic || 1,
-            flipY: options?.flipY !== undefined ? options?.flipY : true
+            flipY: options?.flipY !== undefined ? options?.flipY : false
         }
     }
 

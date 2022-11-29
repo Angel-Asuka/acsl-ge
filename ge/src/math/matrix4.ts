@@ -16,7 +16,7 @@ export class Matrix4{
     }
 
     /** 从 mat 中复制数据 */
-    copyFrom(mat:Matrix4){
+    copy(mat:Matrix4){
         mat4.copy(this.data, mat.data)
     }
 
@@ -43,6 +43,19 @@ export class Matrix4{
     /** 构造正交投影矩阵 */
     ortho(left:number, right:number, bottom:number, top:number, near:number, far:number){
         mat4.ortho(this.data, left, right, bottom, top, near, far)
+    }
+
+    /** 构造2D矩阵，将屏幕像素空间变换到单位空间 */
+    from2D(x:number, y:number, width:number, height:number, screen_width:number, screen_height:number){
+        const d = this.data
+        d[0] = width / screen_width * 2
+        d[5] = height / screen_height * -2
+        d[12] = x / screen_width * 2 - 1
+        d[13] = y / screen_height * -2 + 1
+    }
+
+    from2DWorld(width:number, height:number){
+        mat4.ortho(this.data, 0, width, height, 0, -1, 1)
     }
 
     /** 构造摄影机矩阵 */

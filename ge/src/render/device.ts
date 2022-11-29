@@ -5,6 +5,7 @@ import { RenderingResource } from './resource.js'
 import { VertexAttribute, VertexAttributeUsage, VertexBuffer } from './vertex-buffer.js'
 import { IndexBuffer } from './index-buffer.js'
 import * as StdPrimitive from './std-geometry.js'
+import { StdShaders } from './std-program.js'
 
 /** 渲染设备 */
 export class RenderingDevice {
@@ -148,6 +149,12 @@ export class RenderingDevice {
     createMeshFromOBJ(obj: string): StdPrimitive.StdMesh {
         return StdPrimitive.StdMesh.fromOBJ(this, obj)
     }
+
+    /** @internal */ _std_pro_slice: Program | null = null
+    get stdProgramSlice(){ return this._std_pro_slice || (this._std_pro_slice = new Program(this, StdShaders.vs.slice, StdShaders.fs.std)) }
+
+    /** @internal */ _std_pro_colored_slice: Program | null = null
+    get stdProgramColoredSlice(){ return this._std_pro_colored_slice || (this._std_pro_colored_slice = new Program(this, StdShaders.vs.slice, StdShaders.fs.stdc)) }
 
     // 内部方法，添加资源
     /** @internal */ _addResource(res: RenderingResource){
