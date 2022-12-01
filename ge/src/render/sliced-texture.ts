@@ -5,14 +5,9 @@ import { UniformUsage } from "./program.js"
 
 export type SliceInfo = {
     name: string                    // 切片名称
-    x: number                       // 切片X
-    y: number                       // 切片Y
-    width: number                   // 切片宽度
-    height: number                  // 切片高度
-    frameX: number                  // 切片帧X
-    frameY: number                  // 切片帧Y
-    frameWidth: number              // 切片帧宽度
-    frameHeight: number             // 切片帧高度
+    width:number                    // 切片尺寸 W
+    height:number                   // 切片尺寸 H
+    mat: number[]                   // 切片矩阵
 }
 
 export type SliceManifest = {
@@ -38,24 +33,13 @@ export class SlicedTexture extends Drawable {
         this._frame_matrix = []
         for (let slice of manifest.slices) {
             this._slice_map.set(slice.name, slice)
-            // 切片的绘制矩阵是压缩后的矩阵， 对应关系如下：
-            //      m00  m11  m03  m13
-            //      t00  t11  t03  t13
-            //      0    0    0    0
-            //      0    0    0    0
-            // 其中， m 是顶点坐标变换矩阵， t 是纹理坐标变换矩阵
-            this._frame_matrix.push(new Float32Array([
-                slice.frameWidth / slice.width, slice.frameHeight / slice.height,
-                -slice.frameX / slice.width, -slice.frameY / slice.height,
-                slice.width / manifest.width, slice.height / manifest.height,
-                slice.x / manifest.width , slice.y / manifest.height,
-                0, 0, 0, 0, 0, 0, 0, 0
-            ]))
+            this._frame_matrix.push(new Float32Array(slice.mat))
         }
     }
 
     get texture() { return this._texture }
     get manifest() { return this._manifest }
+    get count() { return this._manifest.slices.length }
 
     getSliceMatrix(id:number){
         return this._frame_matrix[id]

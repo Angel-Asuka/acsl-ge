@@ -6,3 +6,5 @@ package-lock.json
 /sdk/lib
 /ge/dist
 /ge/test/dist
+/ge-packer/test
+/ge-packer/dist

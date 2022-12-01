@@ -1,13 +1,15 @@
 import { RenderingDevice } from "../render/device.js"
 import { ImageTexture } from '../render/image-texture.js'
-import { Resource, ResourceType } from './resource.js'
+import { Resource, ResourceDeclare, ResourceType } from './resource.js'
+
+const dec = new TextDecoder()
 
 export class ImageResource extends Resource {
     /** @internal */ _image: HTMLImageElement
     /** @internal */ _texture: ImageTexture | null
 
-    constructor(name: string, url: string) {
-        super(name, url)
+    constructor(decl:ResourceDeclare) {
+        super(decl)
         this._texture = null
         const img = new Image()
         img.onload = this._onLoaded.bind(this)
@@ -22,7 +24,21 @@ export class ImageResource extends Resource {
     // 加载资源
     load(): void {
         const img = this._image
-        img.src = this.url
+        img.src = this._decl.url
+    }
+
+    // 从数据包中读取
+    loadFromPackageData(data: ArrayBuffer): void {
+        const view = new DataView(data)
+        this._decl.type = view.getUint8(0)
+        const name_len = view.getUint32(1, true)
+        const data_len = view.getUint32(5, true)
+        const data_begin = 9 + name_len
+        const data_end = data_begin + data_len
+        const name = dec.decode(new Uint8Array(data, 9, name_len))
+        this._decl.name = name
+        const blob = new Blob([data.slice(data_begin, data_end)], {type: 'image/png'})
+        this._image.src = URL.createObjectURL(blob)
     }
 
     // 释放资源
@@ -33,9 +49,6 @@ export class ImageResource extends Resource {
             this._texture = null
         }
     }
-
-    // 获取资源是否已加载
-    get loaded(): boolean { return this._image !== null }
 
     // 获取资源图片
     get image(): HTMLImageElement | null { return this._image }

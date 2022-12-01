@@ -1,63 +1,57 @@
-import { ResourceType, Resource } from "./resource.js"
+import { ResourceType, ResourceDeclare, Resource } from "./resource.js"
 import { ImageResource } from "./image.js"
-
-export type ResourceManifestRecord = {
-    name: string
-    uri: string
-    type: ResourceType
-}
-
-export const ResourceImplement = {
-    [ResourceType.Unknown]: Resource,
-    [ResourceType.Image]: ImageResource
-}
-
-export type ResourceManifest = ResourceManifestRecord[]
+import { Package } from "./package.js"
 
 export type ResourceManagerCallbackProgress = (loaded: number, total: number) => void
-export type ResourceManagerCallbackError = (i:number, res: Resource) => 'retry' | 'ignore' | 'abort'
+export type ResourceManagerCallbackError = (i:number, decl: ResourceDeclare) => 'retry' | 'ignore' | 'abort'
 export type ResourceManagerCallbackComplete = () => void
 
+declare type ResourceManagerProgressCallback = (progress: number) => void
+
+const ResourceImplement:any = {
+    [ResourceType.Package]: Package,
+    [ResourceType.Image]: ImageResource,
+    //[ResourceType.Sliced]: SlicedTexture,
+    [ResourceType.Unknown]: Resource
+}
+
 export class ResourceManager {
-    /** @internal */ _manifest: ResourceManifest        // 资源清单
-    /** @internal */ _list: Resource[]                  // 资源顺序索引表
-    /** @internal */ _index: Map<string, Resource>      // 资源名称索引表
-    /** @internal */ _loaded_count: number              // 已加载资源数量
-    /** @internal */ _totalCount: number = 0            // 总资源数量
-    /** @internal */ _failure_count: number             // 加载失败资源数量
-    /** @internal */ _loading: boolean                  // 是否正在加载
-    /** @internal */ _waiting_trigger: Function | null  // 等待触发器
 
-    /** @internal */ _cb_progress: ResourceManagerCallbackProgress | null = null
-    /** @internal */ _cb_error: ResourceManagerCallbackError | null = null
-    /** @internal */ _cb_complete: ResourceManagerCallbackComplete | null = null
+    _list: Resource[]                  // 资源顺序索引表
+    _index: Map<string, Resource>      // 资源名称索引表
+    _loaded_count: number = 0          // 已加载资源数量
+    _totalCount: number = 0            // 总资源数量
+    _failure_count: number = 0         // 加载失败资源数量
+    _loading: boolean = false          // 是否正在加载
+    _waiting_trigger: Function | null  // 等待触发器
 
-    constructor(manifest: ResourceManifest) {
-        this._manifest = manifest
+    _cb_progress: ResourceManagerCallbackProgress = () => {}
+    _cb_error: ResourceManagerCallbackError = () => 'ignore'
+    _cb_complete: ResourceManagerCallbackComplete = () => {}
+
+    constructor(){
         this._list = []
         this._index = new Map()
-        this._loaded_count = 0
-        this._failure_count = 0
         this._waiting_trigger = null
-        this._loading = false
-        this._totalCount = manifest.length
     }
 
-    /**
-     * 加载资源
-     */
-    load() {
+    async load(decl: ResourceDeclare | ResourceDeclare[], on_progress?: ResourceManagerProgressCallback){
+        if(this._loading) throw new Error('Resource manager is loading')
+        if(decl.constructor !== Array){
+            decl = [decl as ResourceDeclare]
+        }
         this._loaded_count = 0
         this._loading = true
-        for (let record of this._manifest) {
-            const resourceObject = new ResourceImplement[record.type](record.name, record.uri)
+        this._totalCount = decl.length
+        for(let d of decl){
+            const resourceObject = new ResourceImplement[d.type](d)
             resourceObject._manager = this
             resourceObject._index = this._list.length
             resourceObject.load()
             this._list.push(resourceObject)
-            this._index.set(record.name, resourceObject)
+            this._index.set(d.name, resourceObject)
         }
-    }
+    } 
 
     /**
      * 取消加载
@@ -126,28 +120,44 @@ export class ResourceManager {
     /**
      * 设置资源加载进度回调
      */
-    set onProgress(cb: ResourceManagerCallbackProgress | null) { this._cb_progress = cb }
+    set onProgress(cb: ResourceManagerCallbackProgress | null) { if(cb) this._cb_progress = cb }
 
     /**
      * 设置资源加载失败回调
      */
-    set onError(cb: ResourceManagerCallbackError | null) { this._cb_error = cb }
+    set onError(cb: ResourceManagerCallbackError | null) { if(cb) this._cb_error = cb }
 
     /**
      * 设置资源加载完成回调
      */
-    set onComplete(cb: ResourceManagerCallbackComplete | null) { this._cb_complete = cb }
+    set onComplete(cb: ResourceManagerCallbackComplete | null) { if(cb) this._cb_complete = cb }
 
+    /**
+     * 将资源加入到索引中
+     */
+    /** @internal */ _add(resource: Resource) {
+        this._totalCount++
+        this._loaded_count++
+        this._index.set(resource.name, resource)
+    }
 
-    /** @internal */ _onResourceLoaded(resource: Resource) {
+    /**
+     * 资源加载完成
+     * @param resource 资源对象
+     */
+    _onResourceLoaded(resource: Resource) {
         this._loaded_count++
         if(this._cb_progress) this._cb_progress(this._loaded_count, this._totalCount)
         if(this._loaded_count === this._totalCount) this._onComplete()
     }
 
-    /** @internal */ _onResourceFailed(resource: Resource) {
+    /**
+     * 资源加载失败
+     * @param resource 资源对象
+     */
+    _onResourceFailed(resource: Resource) {
         if(this._cb_error){
-            switch(this._cb_error(resource._index, resource)){
+            switch(this._cb_error(resource._index, resource._decl)){
                 case 'retry':
                     resource.load()
                     return
@@ -162,7 +172,10 @@ export class ResourceManager {
         if(this._loaded_count === this._totalCount) this._onComplete()
     }
 
-    /** @internal */ _onAbort() {
+    /**
+     * 资源加载中断
+     */
+    _onAbort() {
         for (let resource of this._list) {
             resource._manager = null
             resource.release()
@@ -176,11 +189,15 @@ export class ResourceManager {
         this._waiting_trigger = null
     }
 
-    /** @internal */ _onComplete() {
+    /**
+     * 资源加载完成
+     */
+    _onComplete() {
         this._loading = false
         if(this._cb_complete) this._cb_complete()
         if(this._waiting_trigger) this._waiting_trigger()
         this._waiting_trigger = null
-    }   
+    }
+
 
 }

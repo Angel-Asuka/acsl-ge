@@ -22,10 +22,10 @@ export * from './render/texture.js'
 export * from './render/vertex-buffer.js'
 
 export * from './resource/image.js'
+export * from './resource/lzma.js'
 export * from './resource/manager.js'
 export * from './resource/package.js'
 export * from './resource/resource.js'
+export * from './resource/sliced.js'
 
 export * from './core.js'
-
-export * as Utils from './utils/index.js'

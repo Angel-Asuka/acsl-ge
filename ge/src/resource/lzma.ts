@@ -16,6 +16,9 @@
 /// do    (decompression only)
 /** xe */
 
+// Translate into TypeScript by @AngelAsuka Nov 30, 2022
+// Source: lzma_worker.js
+
 "use strict";
 
 var /** cs */
@@ -25,7 +28,8 @@ var /** cs */
     action_decompress = 2,
     /** de */
     action_progress   = 3,
-    wait = typeof setImmediate == "function" ? setImmediate : setTimeout,
+    //wait = typeof setImmediate == "function" ? setImmediate : setTimeout,
+    wait = (func:Function, delay:number)=>{func()},
     __4294967296 = 4294967296,
     N1_longLit = [4294967295, -__4294967296],
     /** cs */
@@ -34,7 +38,7 @@ var /** cs */
     P0_longLit = [0, 0],
     P1_longLit = [1, 0];
 
-function update_progress(percent, cbn) {
+function update_progress(percent:number, cbn:any) {
     postMessage({
         action: action_progress,
         cbn: cbn,
@@ -42,24 +46,24 @@ function update_progress(percent, cbn) {
     });
 }
 
-function initDim(len) {
+function initDim(len:number) {
     ///NOTE: This is MUCH faster than "new Array(len)" in newer versions of v8 (starting with Node.js 0.11.15, which uses v8 3.28.73).
     var a = [];
     a[len - 1] = undefined;
     return a;
 }
 
-function add(a, b) {
+function add(a:any, b:any) {
     return create(a[0] + b[0], a[1] + b[1]);
 }
 
 /** cs */
-function and(a, b) {
+function and(a:any, b:any) {
     return makeFromBits(~~Math.max(Math.min(a[1] / __4294967296, 2147483647), -2147483648) & ~~Math.max(Math.min(b[1] / __4294967296, 2147483647), -2147483648), lowBits_0(a) & lowBits_0(b));
 }
 /** ce */
 
-function compare(a, b) {
+function compare(a:any, b:any) {
     var nega, negb;
     if (a[0] == b[0] && a[1] == b[1]) {
         return 0;
@@ -78,7 +82,7 @@ function compare(a, b) {
     return 1;
 }
 
-function create(valueLow, valueHigh) {
+function create(valueLow:any, valueHigh:any) {
     var diffHigh, diffLow;
     valueHigh %= 1.8446744073709552E19;
     valueLow %= 1.8446744073709552E19;
@@ -105,11 +109,11 @@ function create(valueLow, valueHigh) {
 }
 
 /** cs */
-function eq(a, b) {
+function eq(a:any, b:any) {
     return a[0] == b[0] && a[1] == b[1];
 }
 /** ce */
-function fromInt(value) {
+function fromInt(value:any) {
     if (value >= 0) {
         return [value, 0];
     } else {
@@ -117,7 +121,7 @@ function fromInt(value) {
     }
 }
 
-function lowBits_0(a) {
+function lowBits_0(a:any) {
     if (a[0] >= 2147483648) {
         return ~~Math.max(Math.min(a[0] - __4294967296, 2147483647), -2147483648);
     } else {
@@ -125,7 +129,7 @@ function lowBits_0(a) {
     }
 }
 /** cs */
-function makeFromBits(highBits, lowBits) {
+function makeFromBits(highBits:any, lowBits:any) {
     var high, low;
     high = highBits * __4294967296;
     low = lowBits;
@@ -135,7 +139,7 @@ function makeFromBits(highBits, lowBits) {
     return [low, high];
 }
 
-function pwrAsDouble(n) {
+function pwrAsDouble(n:any):any {
     if (n <= 30) {
         return 1 << n;
     } else {
@@ -143,7 +147,7 @@ function pwrAsDouble(n) {
     }
 }
 
-function shl(a, n) {
+function shl(a:any, n:any) {
     var diff, newHigh, newLow, twoToN;
     n &= 63;
     if (eq(a, MIN_VALUE)) {
@@ -167,14 +171,14 @@ function shl(a, n) {
     return [newLow, newHigh];
 }
 
-function shr(a, n) {
+function shr(a:any, n:any) {
     var shiftFact;
     n &= 63;
     shiftFact = pwrAsDouble(n);
     return create(Math.floor(a[0] / shiftFact), a[1] / shiftFact);
 }
 
-function shru(a, n) {
+function shru(a:any, n:any) {
     var sr;
     n &= 63;
     sr = shr(a, n);
@@ -186,11 +190,11 @@ function shru(a, n) {
 
 /** ce */
 
-function sub(a, b) {
+function sub(a:any, b:any) {
     return create(a[0] - b[0], a[1] - b[1]);
 }
 
-function $ByteArrayInputStream(this$static, buf) {
+function $ByteArrayInputStream(this$static:any, buf:any) {
     this$static.buf = buf;
     this$static.pos = 0;
     this$static.count = buf.length;
@@ -198,14 +202,14 @@ function $ByteArrayInputStream(this$static, buf) {
 }
 
 /** ds */
-function $read(this$static) {
+function $read(this$static:any) {
     if (this$static.pos >= this$static.count)
         return -1;
     return this$static.buf[this$static.pos++] & 255;
 }
 /** de */
 /** cs */
-function $read_0(this$static, buf, off, len) {
+function $read_0(this$static:any, buf:any, off:any, len:any) {
     if (this$static.pos >= this$static.count)
         return -1;
     len = Math.min(len, this$static.count - this$static.pos);
@@ -215,29 +219,29 @@ function $read_0(this$static, buf, off, len) {
 }
 /** ce */
 
-function $ByteArrayOutputStream(this$static) {
+function $ByteArrayOutputStream(this$static:any) {
     this$static.buf = initDim(32);
     this$static.count = 0;
     return this$static;
 }
 
-function $toByteArray(this$static) {
+function $toByteArray(this$static:any) {
     return new Uint8Array(this$static.buf).subarray(0, this$static.count);
 }
 
 /** cs */
-function $write(this$static, b) {
+function $write(this$static:any, b:any) {
     this$static.buf[this$static.count++] = b << 24 >> 24;
 }
 /** ce */
 
-function $write_0(this$static, buf, off, len) {
+function $write_0(this$static:any, buf:any, off:any, len:any) {
     arraycopy(buf, off, this$static.buf, this$static.count, len);
     this$static.count += len;
 }
 
 /** cs */
-function $getChars(this$static, srcBegin, srcEnd, dst, dstBegin) {
+function $getChars(this$static:any, srcBegin:any, srcEnd:any, dst:any, dstBegin:any) {
     var srcIdx;
     for (srcIdx = srcBegin; srcIdx < srcEnd; ++srcIdx) {
         dst[dstBegin++] = this$static.charCodeAt(srcIdx);
@@ -245,14 +249,14 @@ function $getChars(this$static, srcBegin, srcEnd, dst, dstBegin) {
 }
 /** ce */
 
-function arraycopy(src, srcOfs, dest, destOfs, len) {
+function arraycopy(src:any, srcOfs:any, dest:any, destOfs:any, len:any) {
     for (var i = 0; i < len; ++i) {
         dest[destOfs + i] = src[srcOfs + i];
     }
 }
 
 /** cs */
-function $configure(this$static, encoder) {
+function $configure(this$static:any, encoder:any) {
     $SetDictionarySize_0(encoder, 1 << this$static.s);
     encoder._numFastBytes = this$static.f;
     $SetMatchFinder(encoder, this$static.m);
@@ -267,21 +271,21 @@ function $configure(this$static, encoder) {
     encoder._posStateMask = 3;
 }
 
-function $init(this$static, input, output, length_0, mode) {
+function $init(this$static:any, input:any, output:any, length_0:any, mode:any) {
     var encoder, i;
     if (compare(length_0, N1_longLit) < 0)
         throw new Error("invalid length " + length_0);
     this$static.length_0 = length_0;
     encoder = $Encoder({});
     $configure(mode, encoder);
-    encoder._writeEndMark = typeof LZMA.disableEndMark == "undefined";
+    encoder._writeEndMark = true;
     $WriteCoderProperties(encoder, output);
     for (i = 0; i < 64; i += 8)
         $write(output, lowBits_0(shr(length_0, i)) & 255);
     this$static.chunker = (encoder._needReleaseMFStream = 0 , (encoder._inStream = input , encoder._finished = 0 , $Create_2(encoder) , encoder._rangeEncoder.Stream = output , $Init_4(encoder) , $FillDistancesPrices(encoder) , $FillAlignPrices(encoder) , encoder._lenEncoder._tableSize = encoder._numFastBytes + 1 - 2 , $UpdateTables(encoder._lenEncoder, 1 << encoder._posStateBits) , encoder._repMatchLenEncoder._tableSize = encoder._numFastBytes + 1 - 2 , $UpdateTables(encoder._repMatchLenEncoder, 1 << encoder._posStateBits) , encoder.nowPos64 = P0_longLit , undefined) , $Chunker_0({}, encoder));
 }
 
-function $LZMAByteArrayCompressor(this$static, data, mode) {
+function $LZMAByteArrayCompressor(this$static:any, data:any, mode:any) {
     this$static.output = $ByteArrayOutputStream({});
     $init(this$static, $ByteArrayInputStream({}, data), this$static.output, fromInt(data.length), mode);
     return this$static;
@@ -289,7 +293,7 @@ function $LZMAByteArrayCompressor(this$static, data, mode) {
 /** ce */
 
 /** ds */
-function $init_0(this$static, input, output) {
+function $init_0(this$static:any, input:any, output:any) {
     var decoder,
         hex_length = "",
         i,
@@ -335,14 +339,14 @@ function $init_0(this$static, input, output) {
     this$static.chunker = $CodeInChunks(decoder, input, output, this$static.length_0);
 }
 
-function $LZMAByteArrayDecompressor(this$static, data) {
+function $LZMAByteArrayDecompressor(this$static:any, data:any) {
     this$static.output = $ByteArrayOutputStream({});
     $init_0(this$static, $ByteArrayInputStream({}, data), this$static.output);
     return this$static;
 }
 /** de */
 /** cs */
-function $Create_4(this$static, keepSizeBefore, keepSizeAfter, keepSizeReserv) {
+function $Create_4(this$static:any, keepSizeBefore:any, keepSizeAfter:any, keepSizeReserv:any) {
     var blockSize;
     this$static._keepSizeBefore = keepSizeBefore;
     this$static._keepSizeAfter = keepSizeAfter;
@@ -355,11 +359,11 @@ function $Create_4(this$static, keepSizeBefore, keepSizeAfter, keepSizeReserv) {
     this$static._pointerToLastSafePosition = this$static._blockSize - keepSizeAfter;
 }
 
-function $GetIndexByte(this$static, index) {
+function $GetIndexByte(this$static:any, index:any) {
     return this$static._bufferBase[this$static._bufferOffset + this$static._pos + index];
 }
 
-function $GetMatchLen(this$static, index, distance, limit) {
+function $GetMatchLen(this$static:any, index:any, distance:any, limit:any) {
     var i, pby;
     if (this$static._streamEndWasReached) {
         if (this$static._pos + index + limit > this$static._streamPos) {
@@ -373,11 +377,11 @@ function $GetMatchLen(this$static, index, distance, limit) {
     return i;
 }
 
-function $GetNumAvailableBytes(this$static) {
+function $GetNumAvailableBytes(this$static:any) {
     return this$static._streamPos - this$static._pos;
 }
 
-function $MoveBlock(this$static) {
+function $MoveBlock(this$static:any) {
     var i, numBytes, offset;
     offset = this$static._bufferOffset + this$static._pos - this$static._keepSizeBefore;
     if (offset > 0) {
@@ -390,7 +394,7 @@ function $MoveBlock(this$static) {
     this$static._bufferOffset -= offset;
 }
 
-function $MovePos_1(this$static) {
+function $MovePos_1(this$static:any) {
     var pointerToPostion;
     ++this$static._pos;
     if (this$static._pos > this$static._posLimit) {
@@ -402,7 +406,7 @@ function $MovePos_1(this$static) {
     }
 }
 
-function $ReadBlock(this$static) {
+function $ReadBlock(this$static:any) {
     var numReadBytes, pointerToPostion, size;
     if (this$static._streamEndWasReached)
         return;
@@ -427,7 +431,7 @@ function $ReadBlock(this$static) {
     }
 }
 
-function $ReduceOffsets(this$static, subValue) {
+function $ReduceOffsets(this$static:any, subValue:any) {
     this$static._bufferOffset += subValue;
     this$static._posLimit -= subValue;
     this$static._pos -= subValue;
@@ -449,7 +453,7 @@ var CrcTable = (function () {
     return CrcTable;
 }());
 
-function $Create_3(this$static, historySize, keepAddBufferBefore, matchMaxLen, keepAddBufferAfter) {
+function $Create_3(this$static:any, historySize:any, keepAddBufferBefore:any, matchMaxLen:any, keepAddBufferAfter:any) {
     var cyclicBufferSize, hs, windowReservSize;
     if (historySize < 1073741567) {
         this$static._cutValue = 16 + (matchMaxLen >> 1);
@@ -483,7 +487,7 @@ function $Create_3(this$static, historySize, keepAddBufferBefore, matchMaxLen, k
     }
 }
 
-function $GetMatches(this$static, distances) {
+function $GetMatches(this$static:any, distances:any) {
     var count, cur, curMatch, curMatch2, curMatch3, cyclicPos, delta, hash2Value, hash3Value, hashValue, len, len0, len1, lenLimit, matchMinPos, maxLen, offset, pby1, ptr0, ptr1, temp;
     if (this$static._pos + this$static._matchMaxLen <= this$static._streamPos) {
         lenLimit = this$static._matchMaxLen;
@@ -591,7 +595,7 @@ function $GetMatches(this$static, distances) {
     return offset;
 }
 
-function $Init_5(this$static) {
+function $Init_5(this$static:any) {
     this$static._bufferOffset = 0;
     this$static._pos = 0;
     this$static._streamPos = 0;
@@ -601,7 +605,7 @@ function $Init_5(this$static) {
     $ReduceOffsets(this$static, -1);
 }
 
-function $MovePos_0(this$static) {
+function $MovePos_0(this$static:any) {
     var subValue;
     if (++this$static._cyclicBufferPos >= this$static._cyclicBufferSize) {
         this$static._cyclicBufferPos = 0;
@@ -616,7 +620,7 @@ function $MovePos_0(this$static) {
 }
 
 ///NOTE: This is only called after reading one whole gigabyte.
-function $NormalizeLinks(items, numItems, subValue) {
+function $NormalizeLinks(items:any, numItems:any, subValue:any) {
     var i, value;
     for (i = 0; i < numItems; ++i) {
         value = items[i] || 0;
@@ -629,7 +633,7 @@ function $NormalizeLinks(items, numItems, subValue) {
     }
 }
 
-function $SetType(this$static, numHashBytes) {
+function $SetType(this$static:any, numHashBytes:any) {
     this$static.HASH_ARRAY = numHashBytes > 2;
     if (this$static.HASH_ARRAY) {
         this$static.kNumHashDirectBytes = 0;
@@ -642,7 +646,7 @@ function $SetType(this$static, numHashBytes) {
     }
 }
 
-function $Skip(this$static, num) {
+function $Skip(this$static:any, num:any) {
     var count, cur, curMatch, cyclicPos, delta, hash2Value, hash3Value, hashValue, len, len0, len1, lenLimit, matchMinPos, pby1, ptr0, ptr1, temp;
     do {
         if (this$static._pos + this$static._matchMaxLen <= this$static._streamPos) {
@@ -713,7 +717,7 @@ function $Skip(this$static, num) {
 
 /** ce */
 /** ds */
-function $CopyBlock(this$static, distance, len) {
+function $CopyBlock(this$static:any, distance:any, len:any) {
     var pos = this$static._pos - distance - 1;
     if (pos < 0) {
         pos += this$static._windowSize;
@@ -729,7 +733,7 @@ function $CopyBlock(this$static, distance, len) {
     }
 }
 
-function $Create_5(this$static, windowSize) {
+function $Create_5(this$static:any, windowSize:any) {
     if (this$static._buffer == null || this$static._windowSize != windowSize) {
         this$static._buffer = initDim(windowSize);
     }
@@ -738,7 +742,7 @@ function $Create_5(this$static, windowSize) {
     this$static._streamPos = 0;
 }
 
-function $Flush_0(this$static) {
+function $Flush_0(this$static:any) {
     var size = this$static._pos - this$static._streamPos;
     if (!size) {
         return;
@@ -750,7 +754,7 @@ function $Flush_0(this$static) {
     this$static._streamPos = this$static._pos;
 }
 
-function $GetByte(this$static, distance) {
+function $GetByte(this$static:any, distance:any) {
     var pos = this$static._pos - distance - 1;
     if (pos < 0) {
         pos += this$static._windowSize;
@@ -758,20 +762,20 @@ function $GetByte(this$static, distance) {
     return this$static._buffer[pos];
 }
 
-function $PutByte(this$static, b) {
+function $PutByte(this$static:any, b:any) {
     this$static._buffer[this$static._pos++] = b;
     if (this$static._pos >= this$static._windowSize) {
         $Flush_0(this$static);
     }
 }
 
-function $ReleaseStream(this$static) {
+function $ReleaseStream(this$static:any) {
     $Flush_0(this$static);
     this$static._stream = null;
 }
 /** de */
 
-function GetLenToPosState(len) {
+function GetLenToPosState(len:any) {
     len -= 2;
     if (len < 4) {
         return len;
@@ -779,7 +783,7 @@ function GetLenToPosState(len) {
     return 3;
 }
 
-function StateUpdateChar(index) {
+function StateUpdateChar(index:any) {
     if (index < 4) {
         return 0;
     }
@@ -790,7 +794,7 @@ function StateUpdateChar(index) {
 }
 
 /** cs */
-function $Chunker_0(this$static, encoder) {
+function $Chunker_0(this$static:any, encoder:any) {
     this$static.encoder = encoder;
     this$static.decoder = null;
     this$static.alive = 1;
@@ -798,7 +802,7 @@ function $Chunker_0(this$static, encoder) {
 }
 /** ce */
 /** ds */
-function $Chunker(this$static, decoder) {
+function $Chunker(this$static:any, decoder:any) {
     this$static.decoder = decoder;
     this$static.encoder = null;
     this$static.alive = 1;
@@ -806,7 +810,7 @@ function $Chunker(this$static, decoder) {
 }
 /** de */
 
-function $processChunk(this$static) {
+function $processChunk(this$static:any) {
     if (!this$static.alive) {
         throw new Error("bad state");
     }
@@ -826,7 +830,7 @@ function $processChunk(this$static) {
 }
 
 /** ds */
-function $processDecoderChunk(this$static) {
+function $processDecoderChunk(this$static:any) {
     var result = $CodeOneChunk(this$static.decoder);
     if (result == -1) {
         throw new Error("corrupted input");
@@ -842,7 +846,7 @@ function $processDecoderChunk(this$static) {
 }
 /** de */
 /** cs */
-function $processEncoderChunk(this$static) {
+function $processEncoderChunk(this$static:any) {
     $CodeOneBlock(this$static.encoder, this$static.encoder.processedInSize, this$static.encoder.processedOutSize, this$static.encoder.finished);
     this$static.inBytesProcessed = this$static.encoder.processedInSize[0];
     if (this$static.encoder.finished[0]) {
@@ -853,7 +857,7 @@ function $processEncoderChunk(this$static) {
 /** ce */
 
 /** ds */
-function $CodeInChunks(this$static, inStream, outStream, outSize) {
+function $CodeInChunks(this$static:any, inStream:any, outStream:any, outSize:any) {
     this$static.m_RangeDecoder.Stream = inStream;
     $ReleaseStream(this$static.m_OutWindow);
     this$static.m_OutWindow._stream = outStream;
@@ -869,7 +873,7 @@ function $CodeInChunks(this$static, inStream, outStream, outSize) {
     return $Chunker({}, this$static);
 }
 
-function $CodeOneChunk(this$static) {
+function $CodeOneChunk(this$static:any) {
     var decoder2, distance, len, numDirectBits, posSlot, posState;
     posState = lowBits_0(this$static.nowPos64) & this$static.m_PosStateMask;
     if (!$DecodeBit(this$static.m_RangeDecoder, this$static.m_IsMatchDecoders, (this$static.state << 4) + posState)) {
@@ -944,7 +948,7 @@ function $CodeOneChunk(this$static) {
     return 0;
 }
 
-function $Decoder(this$static) {
+function $Decoder(this$static:any) {
     this$static.m_OutWindow = {};
     this$static.m_RangeDecoder = {};
     this$static.m_IsMatchDecoders = initDim(192);
@@ -965,7 +969,7 @@ function $Decoder(this$static) {
     return this$static;
 }
 
-function $Init_1(this$static) {
+function $Init_1(this$static:any) {
     this$static.m_OutWindow._streamPos = 0;
     this$static.m_OutWindow._pos = 0;
     InitBitModels(this$static.m_IsMatchDecoders);
@@ -985,7 +989,7 @@ function $Init_1(this$static) {
     $Init_8(this$static.m_RangeDecoder);
 }
 
-function $SetDecoderProperties(this$static, properties) {
+function $SetDecoderProperties(this$static:any, properties:any) {
     var dictionarySize, i, lc, lp, pb, remainder, val;
     if (properties.length < 5)
         return 0;
@@ -1005,7 +1009,7 @@ function $SetDecoderProperties(this$static, properties) {
     return $SetDictionarySize(this$static, dictionarySize);
 }
 
-function $SetDictionarySize(this$static, dictionarySize) {
+function $SetDictionarySize(this$static:any, dictionarySize:any) {
     if (dictionarySize < 0) {
         return 0;
     }
@@ -1017,7 +1021,7 @@ function $SetDictionarySize(this$static, dictionarySize) {
     return 1;
 }
 
-function $SetLcLpPb(this$static, lc, lp, pb) {
+function $SetLcLpPb(this$static:any, lc:any, lp:any, pb:any) {
     if (lc > 8 || lp > 4 || pb > 4) {
         return 0;
     }
@@ -1029,14 +1033,14 @@ function $SetLcLpPb(this$static, lc, lp, pb) {
     return 1;
 }
 
-function $Create(this$static, numPosStates) {
+function $Create(this$static:any, numPosStates:any) {
     for (; this$static.m_NumPosStates < numPosStates; ++this$static.m_NumPosStates) {
         this$static.m_LowCoder[this$static.m_NumPosStates] = $BitTreeDecoder({}, 3);
         this$static.m_MidCoder[this$static.m_NumPosStates] = $BitTreeDecoder({}, 3);
     }
 }
 
-function $Decode(this$static, rangeDecoder, posState) {
+function $Decode(this$static:any, rangeDecoder:any, posState:any) {
     if (!$DecodeBit(rangeDecoder, this$static.m_Choice, 0)) {
         return $Decode_0(this$static.m_LowCoder[posState], rangeDecoder);
     }
@@ -1049,7 +1053,7 @@ function $Decode(this$static, rangeDecoder, posState) {
     return symbol;
 }
 
-function $Decoder$LenDecoder(this$static) {
+function $Decoder$LenDecoder(this$static:any) {
     this$static.m_Choice = initDim(2);
     this$static.m_LowCoder = initDim(16);
     this$static.m_MidCoder = initDim(16);
@@ -1058,7 +1062,7 @@ function $Decoder$LenDecoder(this$static) {
     return this$static;
 }
 
-function $Init(this$static) {
+function $Init(this$static:any) {
     InitBitModels(this$static.m_Choice);
     for (var posState = 0; posState < this$static.m_NumPosStates; ++posState) {
         InitBitModels(this$static.m_LowCoder[posState].Models);
@@ -1068,7 +1072,7 @@ function $Init(this$static) {
 }
 
 
-function $Create_0(this$static, numPosBits, numPrevBits) {
+function $Create_0(this$static:any, numPosBits:any, numPrevBits:any) {
     var i, numStates;
     if (this$static.m_Coders != null && this$static.m_NumPrevBits == numPrevBits && this$static.m_NumPosBits == numPosBits)
         return;
@@ -1081,11 +1085,11 @@ function $Create_0(this$static, numPosBits, numPrevBits) {
         this$static.m_Coders[i] = $Decoder$LiteralDecoder$Decoder2({});
 }
 
-function $GetDecoder(this$static, pos, prevByte) {
+function $GetDecoder(this$static:any, pos:any, prevByte:any) {
     return this$static.m_Coders[((pos & this$static.m_PosMask) << this$static.m_NumPrevBits) + ((prevByte & 255) >>> 8 - this$static.m_NumPrevBits)];
 }
 
-function $Init_0(this$static) {
+function $Init_0(this$static:any) {
     var i, numStates;
     numStates = 1 << this$static.m_NumPrevBits + this$static.m_NumPosBits;
     for (i = 0; i < numStates; ++i) {
@@ -1094,7 +1098,7 @@ function $Init_0(this$static) {
 }
 
 
-function $DecodeNormal(this$static, rangeDecoder) {
+function $DecodeNormal(this$static:any, rangeDecoder:any) {
     var symbol = 1;
     do {
         symbol = symbol << 1 | $DecodeBit(rangeDecoder, this$static.m_Decoders, symbol);
@@ -1102,7 +1106,7 @@ function $DecodeNormal(this$static, rangeDecoder) {
     return symbol << 24 >> 24;
 }
 
-function $DecodeWithMatchByte(this$static, rangeDecoder, matchByte) {
+function $DecodeWithMatchByte(this$static:any, rangeDecoder:any, matchByte:any) {
     var bit, matchBit, symbol = 1;
     do {
         matchBit = matchByte >> 7 & 1;
@@ -1119,7 +1123,7 @@ function $DecodeWithMatchByte(this$static, rangeDecoder, matchByte) {
     return symbol << 24 >> 24;
 }
 
-function $Decoder$LiteralDecoder$Decoder2(this$static) {
+function $Decoder$LiteralDecoder$Decoder2(this$static:any) {
     this$static.m_Decoders = initDim(768);
     return this$static;
 }
@@ -1136,7 +1140,7 @@ var g_FastPos = (function () {
     return g_FastPos;
 }());
 
-function $Backward(this$static, cur) {
+function $Backward(this$static:any, cur:any) {
     var backCur, backMem, posMem, posPrev;
     this$static._optimumEndIndex = cur;
     posMem = this$static._optimum[cur].PosPrev;
@@ -1164,7 +1168,7 @@ function $Backward(this$static, cur) {
     return this$static._optimumCurrentIndex;
 }
 
-function $BaseInit(this$static) {
+function $BaseInit(this$static:any) {
     this$static._state = 0;
     this$static._previousByte = 0;
     for (var i = 0; i < 4; ++i) {
@@ -1172,7 +1176,7 @@ function $BaseInit(this$static) {
     }
 }
 
-function $CodeOneBlock(this$static, inSize, outSize, finished) {
+function $CodeOneBlock(this$static:any, inSize:any, outSize:any, finished:any) {
     var baseVal, complexState, curByte, distance, footerBits, i, len, lenToPosState, matchByte, pos, posReduced, posSlot, posState, progressPosValuePrev, subCoder;
     inSize[0] = P0_longLit;
     outSize[0] = P0_longLit;
@@ -1310,7 +1314,7 @@ function $CodeOneBlock(this$static, inSize, outSize, finished) {
     }
 }
 
-function $Create_2(this$static) {
+function $Create_2(this$static:any) {
     var bt, numHashBytes;
     if (!this$static._matchFinder) {
         bt = {};
@@ -1330,7 +1334,7 @@ function $Create_2(this$static) {
     this$static._numFastBytesPrev = this$static._numFastBytes;
 }
 
-function $Encoder(this$static) {
+function $Encoder(this$static:any) {
     var i;
     this$static._repDistances = initDim(4);
     this$static._optimum = [];
@@ -1372,14 +1376,14 @@ function $Encoder(this$static) {
     return this$static;
 }
 
-function $FillAlignPrices(this$static) {
+function $FillAlignPrices(this$static:any) {
     for (var i = 0; i < 16; ++i) {
         this$static._alignPrices[i] = $ReverseGetPrice(this$static._posAlignEncoder, i);
     }
     this$static._alignPriceCount = 0;
 }
 
-function $FillDistancesPrices(this$static) {
+function $FillDistancesPrices(this$static:any) {
     var baseVal, encoder, footerBits, i, lenToPosState, posSlot, st, st2;
     for (i = 4; i < 128; ++i) {
         posSlot = GetPosSlot(i);
@@ -1407,7 +1411,7 @@ function $FillDistancesPrices(this$static) {
     this$static._matchPriceCount = 0;
 }
 
-function $Flush(this$static, nowPos) {
+function $Flush(this$static:any, nowPos:any) {
     $ReleaseMFStream(this$static);
     $WriteEndMarker(this$static, nowPos & this$static._posStateMask);
     for (var i = 0; i < 5; ++i) {
@@ -1415,7 +1419,7 @@ function $Flush(this$static, nowPos) {
     }
 }
 
-function $GetOptimum(this$static, position) {
+function $GetOptimum(this$static:any, position:any) {
     var cur, curAnd1Price, curAndLenCharPrice, curAndLenPrice, curBack, curPrice, currentByte, distance, i, len, lenEnd, lenMain, lenRes, lenTest, lenTest2, lenTestTemp, matchByte, matchPrice, newLen, nextIsChar, nextMatchPrice, nextOptimum, nextRepMatchPrice, normalMatchPrice, numAvailableBytes, numAvailableBytesFull, numDistancePairs, offs, offset, opt, optimum, pos, posPrev, posState, posStateNext, price_4, repIndex, repLen, repMatchPrice, repMaxIndex, shortRepPrice, startLen, state, state2, t, price, price_0, price_1, price_2, price_3;
     if (this$static._optimumEndIndex != this$static._optimumCurrentIndex) {
         lenRes = this$static._optimum[this$static._optimumCurrentIndex].PosPrev - this$static._optimumCurrentIndex;
@@ -1791,7 +1795,7 @@ function $GetOptimum(this$static, position) {
     }
 }
 
-function $GetPosLenPrice(this$static, pos, len, posState) {
+function $GetPosLenPrice(this$static:any, pos:any, len:any, posState:any) {
     var price, lenToPosState = GetLenToPosState(len);
     if (pos < 128) {
         price = this$static._distancesPrices[lenToPosState * 128 + pos];
@@ -1801,7 +1805,7 @@ function $GetPosLenPrice(this$static, pos, len, posState) {
     return price + $GetPrice(this$static._lenEncoder, len - 2, posState);
 }
 
-function $GetPureRepPrice(this$static, repIndex, state, posState) {
+function $GetPureRepPrice(this$static:any, repIndex:any, state:any, posState:any) {
     var price;
     if (!repIndex) {
         price = ProbPrices[this$static._isRepG0[state] >>> 2];
@@ -1818,11 +1822,11 @@ function $GetPureRepPrice(this$static, repIndex, state, posState) {
     return price;
 }
 
-function $GetRepLen1Price(this$static, state, posState) {
+function $GetRepLen1Price(this$static:any, state:any, posState:any) {
     return ProbPrices[this$static._isRepG0[state] >>> 2] + ProbPrices[this$static._isRep0Long[(state << 4) + posState] >>> 2];
 }
 
-function $Init_4(this$static) {
+function $Init_4(this$static:any) {
     $BaseInit(this$static);
     $Init_9(this$static._rangeEncoder);
     InitBitModels(this$static._isMatch);
@@ -1845,14 +1849,14 @@ function $Init_4(this$static) {
     this$static._additionalOffset = 0;
 }
 
-function $MovePos(this$static, num) {
+function $MovePos(this$static:any, num:any) {
     if (num > 0) {
         $Skip(this$static._matchFinder, num);
         this$static._additionalOffset += num;
     }
 }
 
-function $ReadMatchDistances(this$static) {
+function $ReadMatchDistances(this$static:any) {
     var lenRes = 0;
     this$static._numDistancePairs = $GetMatches(this$static._matchFinder, this$static._matchDistances);
     if (this$static._numDistancePairs > 0) {
@@ -1864,25 +1868,25 @@ function $ReadMatchDistances(this$static) {
     return lenRes;
 }
 
-function $ReleaseMFStream(this$static) {
+function $ReleaseMFStream(this$static:any) {
     if (this$static._matchFinder && this$static._needReleaseMFStream) {
         this$static._matchFinder._stream = null;
         this$static._needReleaseMFStream = 0;
     }
 }
 
-function $ReleaseStreams(this$static) {
+function $ReleaseStreams(this$static:any) {
     $ReleaseMFStream(this$static);
     this$static._rangeEncoder.Stream = null;
 }
 
-function $SetDictionarySize_0(this$static, dictionarySize) {
+function $SetDictionarySize_0(this$static:any, dictionarySize:any) {
     this$static._dictionarySize = dictionarySize;
     for (var dicLogSize = 0; dictionarySize > 1 << dicLogSize; ++dicLogSize) {}
     this$static._distTableSize = dicLogSize * 2;
 }
 
-function $SetMatchFinder(this$static, matchFinderIndex) {
+function $SetMatchFinder(this$static:any, matchFinderIndex:any) {
     var matchFinderIndexPrev = this$static._matchFinderType;
     this$static._matchFinderType = matchFinderIndex;
     if (this$static._matchFinder && matchFinderIndexPrev != this$static._matchFinderType) {
@@ -1891,7 +1895,7 @@ function $SetMatchFinder(this$static, matchFinderIndex) {
     }
 }
 
-function $WriteCoderProperties(this$static, outStream) {
+function $WriteCoderProperties(this$static:any, outStream:any) {
     this$static.properties[0] = (this$static._posStateBits * 5 + this$static._numLiteralPosStateBits) * 9 + this$static._numLiteralContextBits << 24 >> 24;
     for (var i = 0; i < 4; ++i) {
         this$static.properties[1 + i] = this$static._dictionarySize >> 8 * i << 24 >> 24;
@@ -1899,7 +1903,7 @@ function $WriteCoderProperties(this$static, outStream) {
     $write_0(outStream, this$static.properties, 0, 5);
 }
 
-function $WriteEndMarker(this$static, posState) {
+function $WriteEndMarker(this$static:any, posState:any) {
     if (!this$static._writeEndMark) {
         return;
     }
@@ -1913,7 +1917,7 @@ function $WriteEndMarker(this$static, posState) {
     $ReverseEncode(this$static._posAlignEncoder, this$static._rangeEncoder, 15);
 }
 
-function GetPosSlot(pos) {
+function GetPosSlot(pos:any) {
     if (pos < 2048) {
         return g_FastPos[pos];
     }
@@ -1923,7 +1927,7 @@ function GetPosSlot(pos) {
     return g_FastPos[pos >> 20] + 40;
 }
 
-function GetPosSlot2(pos) {
+function GetPosSlot2(pos:any) {
     if (pos < 131072) {
         return g_FastPos[pos >> 6] + 12;
     }
@@ -1933,7 +1937,7 @@ function GetPosSlot2(pos) {
     return g_FastPos[pos >> 26] + 52;
 }
 
-function $Encode(this$static, rangeEncoder, symbol, posState) {
+function $Encode(this$static:any, rangeEncoder:any, symbol:any, posState:any) {
     if (symbol < 8) {
         $Encode_3(rangeEncoder, this$static._choice, 0, 0);
         $Encode_2(this$static._lowCoder[posState], rangeEncoder, symbol);
@@ -1950,7 +1954,7 @@ function $Encode(this$static, rangeEncoder, symbol, posState) {
     }
 }
 
-function $Encoder$LenEncoder(this$static) {
+function $Encoder$LenEncoder(this$static:any) {
     this$static._choice = initDim(2);
     this$static._lowCoder = initDim(16);
     this$static._midCoder = initDim(16);
@@ -1962,7 +1966,7 @@ function $Encoder$LenEncoder(this$static) {
     return this$static;
 }
 
-function $Init_2(this$static, numPosStates) {
+function $Init_2(this$static:any, numPosStates:any) {
     InitBitModels(this$static._choice);
     for (var posState = 0; posState < numPosStates; ++posState) {
         InitBitModels(this$static._lowCoder[posState].Models);
@@ -1971,7 +1975,7 @@ function $Init_2(this$static, numPosStates) {
     InitBitModels(this$static._highCoder.Models);
 }
 
-function $SetPrices(this$static, posState, numSymbols, prices, st) {
+function $SetPrices(this$static:any, posState:any, numSymbols:any, prices:any, st:any) {
     var a0, a1, b0, b1, i;
     a0 = ProbPrices[this$static._choice[0] >>> 2];
     a1 = ProbPrices[2048 - this$static._choice[0] >>> 2];
@@ -1993,7 +1997,7 @@ function $SetPrices(this$static, posState, numSymbols, prices, st) {
     }
 }
 
-function $Encode_0(this$static, rangeEncoder, symbol, posState) {
+function $Encode_0(this$static:any, rangeEncoder:any, symbol:any, posState:any) {
     $Encode(this$static, rangeEncoder, symbol, posState);
     if (--this$static._counters[posState] == 0) {
         $SetPrices(this$static, posState, this$static._tableSize, this$static._prices, posState * 272);
@@ -2001,25 +2005,25 @@ function $Encode_0(this$static, rangeEncoder, symbol, posState) {
     }
 }
 
-function $Encoder$LenPriceTableEncoder(this$static) {
+function $Encoder$LenPriceTableEncoder(this$static:any) {
     $Encoder$LenEncoder(this$static);
     this$static._prices = [];
     this$static._counters = [];
     return this$static;
 }
 
-function $GetPrice(this$static, symbol, posState) {
+function $GetPrice(this$static:any, symbol:any, posState:any) {
     return this$static._prices[posState * 272 + symbol];
 }
 
-function $UpdateTables(this$static, numPosStates) {
+function $UpdateTables(this$static:any, numPosStates:any) {
     for (var posState = 0; posState < numPosStates; ++posState) {
         $SetPrices(this$static, posState, this$static._tableSize, this$static._prices, posState * 272);
         this$static._counters[posState] = this$static._tableSize;
     }
 }
 
-function $Create_1(this$static, numPosBits, numPrevBits) {
+function $Create_1(this$static:any, numPosBits:any, numPrevBits:any) {
     var i, numStates;
     if (this$static.m_Coders != null && this$static.m_NumPrevBits == numPrevBits && this$static.m_NumPosBits == numPosBits) {
         return;
@@ -2034,18 +2038,18 @@ function $Create_1(this$static, numPosBits, numPrevBits) {
     }
 }
 
-function $GetSubCoder(this$static, pos, prevByte) {
+function $GetSubCoder(this$static:any, pos:any, prevByte:any) {
     return this$static.m_Coders[((pos & this$static.m_PosMask) << this$static.m_NumPrevBits) + ((prevByte & 255) >>> 8 - this$static.m_NumPrevBits)];
 }
 
-function $Init_3(this$static) {
+function $Init_3(this$static:any) {
     var i, numStates = 1 << this$static.m_NumPrevBits + this$static.m_NumPosBits;
     for (i = 0; i < numStates; ++i) {
         InitBitModels(this$static.m_Coders[i].m_Encoders);
     }
 }
 
-function $Encode_1(this$static, rangeEncoder, symbol) {
+function $Encode_1(this$static:any, rangeEncoder:any, symbol:any) {
     var bit, i, context = 1;
     for (i = 7; i >= 0; --i) {
         bit = symbol >> i & 1;
@@ -2054,8 +2058,8 @@ function $Encode_1(this$static, rangeEncoder, symbol) {
     }
 }
 
-function $EncodeMatched(this$static, rangeEncoder, matchByte, symbol) {
-    var bit, i, matchBit, state, same = 1, context = 1;
+function $EncodeMatched(this$static:any, rangeEncoder:any, matchByte:any, symbol:any) {
+    var bit, i, matchBit, state, same = 1 as any, context = 1;
     for (i = 7; i >= 0; --i) {
         bit = symbol >> i & 1;
         state = context;
@@ -2069,12 +2073,12 @@ function $EncodeMatched(this$static, rangeEncoder, matchByte, symbol) {
     }
 }
 
-function $Encoder$LiteralEncoder$Encoder2(this$static) {
+function $Encoder$LiteralEncoder$Encoder2(this$static:any) {
     this$static.m_Encoders = initDim(768);
     return this$static;
 }
 
-function $GetPrice_0(this$static, matchMode, matchByte, symbol) {
+function $GetPrice_0(this$static:any, matchMode:any, matchByte:any, symbol:any) {
     var bit, context = 1, i = 7, matchBit, price = 0;
     if (matchMode) {
         for (; i >= 0; --i) {
@@ -2096,24 +2100,24 @@ function $GetPrice_0(this$static, matchMode, matchByte, symbol) {
     return price;
 }
 
-function $MakeAsChar(this$static) {
+function $MakeAsChar(this$static:any) {
     this$static.BackPrev = -1;
     this$static.Prev1IsChar = 0;
 }
 
-function $MakeAsShortRep(this$static) {
+function $MakeAsShortRep(this$static:any) {
     this$static.BackPrev = 0;
     this$static.Prev1IsChar = 0;
 }
 /** ce */
 /** ds */
-function $BitTreeDecoder(this$static, numBitLevels) {
+function $BitTreeDecoder(this$static:any, numBitLevels:any) {
     this$static.NumBitLevels = numBitLevels;
     this$static.Models = initDim(1 << numBitLevels);
     return this$static;
 }
 
-function $Decode_0(this$static, rangeDecoder) {
+function $Decode_0(this$static:any, rangeDecoder:any) {
     var bitIndex, m = 1;
     for (bitIndex = this$static.NumBitLevels; bitIndex != 0; --bitIndex) {
         m = (m << 1) + $DecodeBit(rangeDecoder, this$static.Models, m);
@@ -2121,7 +2125,7 @@ function $Decode_0(this$static, rangeDecoder) {
     return m - (1 << this$static.NumBitLevels);
 }
 
-function $ReverseDecode(this$static, rangeDecoder) {
+function $ReverseDecode(this$static:any, rangeDecoder:any) {
     var bit, bitIndex, m = 1, symbol = 0;
     for (bitIndex = 0; bitIndex < this$static.NumBitLevels; ++bitIndex) {
         bit = $DecodeBit(rangeDecoder, this$static.Models, m);
@@ -2132,7 +2136,7 @@ function $ReverseDecode(this$static, rangeDecoder) {
     return symbol;
 }
 
-function ReverseDecode(Models, startIndex, rangeDecoder, NumBitLevels) {
+function ReverseDecode(Models:any, startIndex:any, rangeDecoder:any, NumBitLevels:any) {
     var bit, bitIndex, m = 1, symbol = 0;
     for (bitIndex = 0; bitIndex < NumBitLevels; ++bitIndex) {
         bit = $DecodeBit(rangeDecoder, Models, startIndex + m);
@@ -2144,13 +2148,13 @@ function ReverseDecode(Models, startIndex, rangeDecoder, NumBitLevels) {
 }
 /** de */
 /** cs */
-function $BitTreeEncoder(this$static, numBitLevels) {
+function $BitTreeEncoder(this$static:any, numBitLevels:any) {
     this$static.NumBitLevels = numBitLevels;
     this$static.Models = initDim(1 << numBitLevels);
     return this$static;
 }
 
-function $Encode_2(this$static, rangeEncoder, symbol) {
+function $Encode_2(this$static:any, rangeEncoder:any, symbol:any) {
     var bit, bitIndex, m = 1;
     for (bitIndex = this$static.NumBitLevels; bitIndex != 0;) {
         --bitIndex;
@@ -2160,7 +2164,7 @@ function $Encode_2(this$static, rangeEncoder, symbol) {
     }
 }
 
-function $GetPrice_1(this$static, symbol) {
+function $GetPrice_1(this$static:any, symbol:any) {
     var bit, bitIndex, m = 1, price = 0;
     for (bitIndex = this$static.NumBitLevels; bitIndex != 0;) {
         --bitIndex;
@@ -2171,7 +2175,7 @@ function $GetPrice_1(this$static, symbol) {
     return price;
 }
 
-function $ReverseEncode(this$static, rangeEncoder, symbol) {
+function $ReverseEncode(this$static:any, rangeEncoder:any, symbol:any) {
     var bit, i, m = 1;
     for (i = 0; i < this$static.NumBitLevels; ++i) {
         bit = symbol & 1;
@@ -2181,7 +2185,7 @@ function $ReverseEncode(this$static, rangeEncoder, symbol) {
     }
 }
 
-function $ReverseGetPrice(this$static, symbol) {
+function $ReverseGetPrice(this$static:any, symbol:any) {
     var bit, i, m = 1, price = 0;
     for (i = this$static.NumBitLevels; i != 0; --i) {
         bit = symbol & 1;
@@ -2192,7 +2196,7 @@ function $ReverseGetPrice(this$static, symbol) {
     return price;
 }
 
-function ReverseEncode(Models, startIndex, rangeEncoder, NumBitLevels, symbol) {
+function ReverseEncode(Models:any, startIndex:any, rangeEncoder:any, NumBitLevels:any, symbol:any) {
     var bit, i, m = 1;
     for (i = 0; i < NumBitLevels; ++i) {
         bit = symbol & 1;
@@ -2202,7 +2206,7 @@ function ReverseEncode(Models, startIndex, rangeEncoder, NumBitLevels, symbol) {
     }
 }
 
-function ReverseGetPrice(Models, startIndex, NumBitLevels, symbol) {
+function ReverseGetPrice(Models:any, startIndex:any, NumBitLevels:any, symbol:any) {
     var bit, i, m = 1, price = 0;
     for (i = NumBitLevels; i != 0; --i) {
         bit = symbol & 1;
@@ -2214,7 +2218,7 @@ function ReverseGetPrice(Models, startIndex, NumBitLevels, symbol) {
 }
 /** ce */
 /** ds */
-function $DecodeBit(this$static, probs, index) {
+function $DecodeBit(this$static:any, probs:any, index:any) {
     var newBound, prob = probs[index];
     newBound = (this$static.Range >>> 11) * prob;
     if ((this$static.Code ^ -2147483648) < (newBound ^ -2147483648)) {
@@ -2237,7 +2241,7 @@ function $DecodeBit(this$static, probs, index) {
     }
 }
 
-function $DecodeDirectBits(this$static, numTotalBits) {
+function $DecodeDirectBits(this$static:any, numTotalBits:any) {
     var i, t, result = 0;
     for (i = numTotalBits; i != 0; --i) {
         this$static.Range >>>= 1;
@@ -2252,7 +2256,7 @@ function $DecodeDirectBits(this$static, numTotalBits) {
     return result;
 }
 
-function $Init_8(this$static) {
+function $Init_8(this$static:any) {
     this$static.Code = 0;
     this$static.Range = -1;
     for (var i = 0; i < 5; ++i) {
@@ -2261,7 +2265,7 @@ function $Init_8(this$static) {
 }
 /** de */
 
-function InitBitModels(probs) {
+function InitBitModels(probs:any) {
     for (var i = probs.length - 1; i >= 0; --i) {
         probs[i] = 1024;
     }
@@ -2279,7 +2283,7 @@ var ProbPrices = (function () {
     return ProbPrices;
 }());
 
-function $Encode_3(this$static, probs, index, symbol) {
+function $Encode_3(this$static:any, probs:any, index:any, symbol:any) {
     var newBound, prob = probs[index];
     newBound = (this$static.Range >>> 11) * prob;
     if (!symbol) {
@@ -2296,7 +2300,7 @@ function $Encode_3(this$static, probs, index, symbol) {
     }
 }
 
-function $EncodeDirectBits(this$static, v, numTotalBits) {
+function $EncodeDirectBits(this$static:any, v:any, numTotalBits:any) {
     for (var i = numTotalBits - 1; i >= 0; --i) {
         this$static.Range >>>= 1;
         if ((v >>> i & 1) == 1) {
@@ -2309,11 +2313,11 @@ function $EncodeDirectBits(this$static, v, numTotalBits) {
     }
 }
 
-function $GetProcessedSizeAdd(this$static) {
+function $GetProcessedSizeAdd(this$static:any) {
     return add(add(fromInt(this$static._cacheSize), this$static._position), [4, 0]);
 }
 
-function $Init_9(this$static) {
+function $Init_9(this$static:any) {
     this$static._position = P0_longLit;
     this$static.Low = P0_longLit;
     this$static.Range = -1;
@@ -2321,7 +2325,7 @@ function $Init_9(this$static) {
     this$static._cache = 0;
 }
 
-function $ShiftLow(this$static) {
+function $ShiftLow(this$static:any) {
     var temp, LowHi = lowBits_0(shru(this$static.Low, 32));
     if (LowHi != 0 || compare(this$static.Low, [4278190080, 0]) < 0) {
         this$static._position = add(this$static._position, fromInt(this$static._cacheSize));
@@ -2336,13 +2340,13 @@ function $ShiftLow(this$static) {
     this$static.Low = shl(and(this$static.Low, [16777215, 0]), 8);
 }
 
-function GetPrice(Prob, symbol) {
+function GetPrice(Prob:any, symbol:any) {
     return ProbPrices[((Prob - symbol ^ -symbol) & 2047) >>> 2];
 }
 
 /** ce */
 /** ds */
-function decode(utf) {
+function decode(utf:any) {
     var i = 0, j = 0, x, y, z, l = utf.length, buf = [], charCodes = [];
     for (; i < l; ++i, ++j) {
         x = utf[i] & 255;
@@ -2396,8 +2400,8 @@ function decode(utf) {
 }
 /** de */
 /** cs */
-function encode(s) {
-    var ch, chars = [], data, elen = 0, i, l = s.length;
+function encode(s:any) {
+    var ch, chars = [] as any[], data, elen = 0, i, l = s.length;
     /// Be able to handle binary arrays and buffers.
     if (typeof s == "object") {
         return s;
@@ -2434,15 +2438,15 @@ function encode(s) {
 }
 /** ce */
 
-function toDouble(a) {
+function toDouble(a:any) {
     return a[1] + a[0];
 }
 
 /** cs */
-function compress(str, mode, on_finish, on_progress) {
-    var this$static = {},
-        percent,
-        cbn, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
+function compress(str:any, mode:any, on_finish:any, on_progress:any) {
+    var this$static = {} as any,
+        percent:any,
+        cbn:any, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
         sync = typeof on_finish == "undefined" && typeof on_progress == "undefined";
     
     if (typeof on_finish != "function") {
@@ -2450,14 +2454,14 @@ function compress(str, mode, on_finish, on_progress) {
         on_finish = on_progress = 0;
     }
     
-    on_progress = on_progress || function(percent) {
+    on_progress = on_progress || function(percent:number) {
         if (typeof cbn == "undefined")
             return;
         
         return update_progress(percent, cbn);
     };
     
-    on_finish = on_finish || function(res, err) {
+    on_finish = on_finish || function(res:any, err:any) {
         if (typeof cbn == "undefined")
             return;
         
@@ -2514,12 +2518,12 @@ function compress(str, mode, on_finish, on_progress) {
 }
 /** ce */
 /** ds */
-function decompress(byte_arr, on_finish, on_progress) {
-    var this$static = {},
+function decompress(byte_arr:any, on_finish:any, on_progress:any) {
+    var this$static = {} as any,
         percent,
-        cbn, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
-        has_progress,
-        len,
+        cbn:any, /// A callback number should be supplied instead of on_finish() if we are using Web Workers.
+        has_progress:any,
+        len:any,
         sync = typeof on_finish == "undefined" && typeof on_progress == "undefined";
 
     if (typeof on_finish != "function") {
@@ -2527,14 +2531,14 @@ function decompress(byte_arr, on_finish, on_progress) {
         on_finish = on_progress = 0;
     }
     
-    on_progress = on_progress || function(percent) {
+    on_progress = on_progress || function(percent:any) {
         if (typeof cbn == "undefined")
             return;
         
         return update_progress(has_progress ? percent : -1, cbn);
     };
     
-    on_finish = on_finish || function(res, err) {
+    on_finish = on_finish || function(res:any, err:any) {
         if (typeof cbn == "undefined")
             return;
         
@@ -2618,11 +2622,12 @@ var get_mode_obj = (function () {
         {s: 25, f: 255, m: 1}
     ];
     
-    return function (mode) {
+    return function (mode:any) {
         return modes[mode - 1] || modes[6];
     };
 }());
 /** ce */
+
 
 /// If we're in a Web Worker, create the onmessage() communication channel.
 ///NOTE: This seems to be the most reliable way to detect this.
@@ -2634,9 +2639,9 @@ if (typeof onmessage != "undefined" && (typeof window == "undefined" || typeof w
             if (e && e.data) {
                 /** xs */
                 if (e.data.action == action_decompress) {
-                    LZMA.decompress(e.data.data, e.data.cbn);
+                    decompress(e.data.data, e.data.cbn,null);
                 } else if (e.data.action == action_compress) {
-                    LZMA.compress(e.data.data, e.data.mode, e.data.cbn);
+                    compress(e.data.data, e.data.mode, e.data.cbn,null);
                 }
                 /** xe */
                 /// co:if (e.data.action == action_compress) {
@@ -2649,13 +2654,15 @@ if (typeof onmessage != "undefined" && (typeof window == "undefined" || typeof w
         };
     }());
 }
-    
-export const LZMA = {
-    /** xs */
-    compress:   compress,
-    decompress: decompress,
-    /** xe */
-    /// co:compress:   compress
-    /// do:decompress: decompress
-};
 
+// Translate into TypeScript by @AngelAsuka Nov 30, 2022
+// Export the following class
+export class Lzma {
+    static compress(data: Uint8Array, level?: number, on_progress?:(p:number)=>void): Promise<Uint8Array> {
+        return new Promise((resolve) => {compress(data, level??9, (result:Uint8Array, err:any) => {resolve(result)},on_progress)})
+    }
+
+    static decompress(data: Uint8Array, on_progress?:(p:number)=>void): Promise<Uint8Array> {
+        return new Promise((resolve) => {decompress(data, (result:Uint8Array, err:any) => {resolve(result)}, on_progress)})
+    }
+}

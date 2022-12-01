@@ -21,7 +21,9 @@ export class ImageTexture extends Texture {
             if(this._texture != null) {
                 ctx.bindTexture(ctx.TEXTURE_2D, this._texture)
                 ctx.pixelStorei(ctx.UNPACK_FLIP_Y_WEBGL, this.options.flipY ? 1 : 0)
+                console.log(this._img)
                 ctx.texImage2D(ctx.TEXTURE_2D, 0, format, format, dataType, this._img)
+                console.log('???', format, dataType)
                 this._applyOptions()
                 ctx.bindTexture(ctx.TEXTURE_2D, null)
             }

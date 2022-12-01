@@ -1,11 +1,13 @@
 import { Shader } from './shader.js'
 import { Program } from './program.js'
 import { ImageTexture } from './image-texture.js'
+import { SlicedTexture, SliceManifest } from './sliced-texture.js'
 import { RenderingResource } from './resource.js'
 import { VertexAttribute, VertexAttributeUsage, VertexBuffer } from './vertex-buffer.js'
 import { IndexBuffer } from './index-buffer.js'
 import * as StdPrimitive from './std-geometry.js'
 import { StdShaders } from './std-program.js'
+import { Texture } from './texture.js'
 
 /** 渲染设备 */
 export class RenderingDevice {
@@ -70,6 +72,16 @@ export class RenderingDevice {
     createTextureFromImage(img: HTMLImageElement): ImageTexture {
         const tex = new ImageTexture(this, img)
         return tex
+    }
+
+    /**
+     * 构造一个切片纹理对象
+     * @param texture 纹理对象
+     * @param manifest 切片信息
+     * @returns 切片纹理对象
+     */
+    createSlicedTexture(texture:Texture, manifest:SliceManifest): SlicedTexture {
+        return new SlicedTexture(this, texture, manifest)
     }
 
     /**

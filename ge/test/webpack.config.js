@@ -19,6 +19,7 @@ module.exports = {
         rules: [
             { test: /\.jpg$/, use: 'file-loader?name=[name].[ext]'},
             { test: /\.obj$/, use: 'file-loader?name=[name].[ext]'},
+            { test: /\.res$/, use: 'file-loader?name=[name].[ext]'},
             { test: /\.ts$/, loader: "babel-loader", exclude: /(node_modules|bower_components)/ },
             { test: /\.tsx?$/, loader: "ts-loader", exclude: /(node_modules|bower_components)/ },
             { test: /\.js$/, loader: "source-map-loader", exclude: /(node_modules|bower_components)/ },

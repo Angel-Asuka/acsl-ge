@@ -97,6 +97,10 @@ export class Program extends RenderingResource {
     getUniformLocation(name: string): WebGLUniformLocation | null {
         return this._uniforms[name]
     }
+    
+    getUniformLocationByUsage(usage: UniformUsage): WebGLUniformLocation | null {
+        return this._uniform_usage[usage]
+    }
 
     // 获取attribute变量的位置
     getAttributeLocation(name: string): number {
