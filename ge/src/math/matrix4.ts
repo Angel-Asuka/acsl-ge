@@ -7,17 +7,30 @@ export class Matrix4{
 
     data: Float32Array
 
-    constructor(){
-        this.data = new Float32Array(16)
-        this.data[0] = 1
-        this.data[5] = 1
-        this.data[10] = 1
-        this.data[15] = 1
+    constructor(init_data?:Float32Array | number[]){
+        if(init_data){
+            if(init_data instanceof Float32Array){
+                this.data = init_data
+            }else{
+                this.data = new Float32Array(init_data)
+            }
+        }else{
+            this.data = new Float32Array(16)
+            this.data[0] = 1
+            this.data[5] = 1
+            this.data[10] = 1
+            this.data[15] = 1
+        }
     }
 
     /** 从 mat 中复制数据 */
     copy(mat:Matrix4){
         mat4.copy(this.data, mat.data)
+    }
+
+    /** 从 number 数组中复制数据 */
+    set(mat:number[]){
+        this.data.set(mat)
     }
 
     /** 设置为单位矩阵 */

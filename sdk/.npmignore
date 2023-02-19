@@ -3,3 +3,4 @@ test/
 out/
 config/
 tsconfig.*
+publish

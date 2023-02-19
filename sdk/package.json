@@ -1,6 +1,6 @@
 {
   "name": "@acsl/ge-sdk",
-  "version": "1.0.2",
+  "version": "1.0.4",
   "description": "ACSL-GE Service Development Kit",
   "author": "AngelAsuka",
   "license": "MIT",
@@ -24,6 +24,6 @@
     "@types/ws": "^8.5.3"
   },
   "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "registry":"https://registry.npmjs.org"
   }
 }

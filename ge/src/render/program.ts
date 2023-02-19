@@ -1,6 +1,8 @@
-import { RenderingDevice } from './device.js'
+import { RenderingCore } from './core.js'
 import { RenderingResource } from './resource.js'
-import { VertexAttributeUsage } from './vertex-buffer.js'
+import { VertexAttributeUsage } from './primitive.js'
+import * as b64 from '../utils/base64.js'
+import { Lzma } from '../utils/lzma.js'
 
 const DefaultAttributeUsageMap = {
     a_pos: VertexAttributeUsage.POSITION,
@@ -21,29 +23,36 @@ const DefaultAttributeUsageMap = {
     a_weights1: VertexAttributeUsage.WEIGHTS_1
 }
 
-export enum UniformUsage {
+enum UniformUsage {
     MAT_PV = 0,             // mat4  投影视图矩阵
-    MAT_WORLD = 1,          // mat4  世界矩阵
-    MAT_SLICE = 2,          // mat4  切片矩阵
-    MAT_COLOR = 3,          // mat4  颜色矩阵
+    MAT_VIEW = 1,           // mat4  视图矩阵
+    MAT_WORLD = 2,          // mat4  世界矩阵
+    MAT_SLICE = 3,          // mat4  切片矩阵
+    MAT_COLOR = 4,          // mat4  颜色矩阵
 }
 
 const DefaultUniformUsageMap = {
     mw : UniformUsage.MAT_WORLD,
     mpv : UniformUsage.MAT_PV,
+    mv : UniformUsage.MAT_VIEW,
     ms : UniformUsage.MAT_SLICE,
     mc : UniformUsage.MAT_COLOR
 }
 
-export type ProgramOptions = {
+export type RenderingProgramOptions = {
     attribute_usage_map?: { [key: string]: VertexAttributeUsage }, 
-    uniform_usage_map?: { [key: string]: UniformUsage }
+    uniform_usage_map?: { [key: string]: UniformUsage },
+    compressed?: boolean
+}
+
+function decodeShaderSource(s:string) {
+    return Lzma.decompressSync(new Uint8Array(b64.decode(s)))
 }
 
 /**
  * 渲染程序对象
  */
-export class Program extends RenderingResource {
+export class RenderingProgram extends RenderingResource {
 
     /** @internal */ _program: WebGLProgram | null                                    // 渲染程序
     /** @internal */ _vertex_shader: WebGLShader | null                               // 顶点着色器
@@ -62,7 +71,7 @@ export class Program extends RenderingResource {
     /** @internal */ _attribute_usage_map: { [key: string]: VertexAttributeUsage } = DefaultAttributeUsageMap
     /** @internal */ _uniform_usage_map: { [key: string]: UniformUsage } = DefaultUniformUsageMap
 
-    constructor(device: RenderingDevice, vertex_shader: string, fragment_shader: string, options?: ProgramOptions) {
+    constructor(device: RenderingCore, vertex_shader: string, fragment_shader: string, options?: RenderingProgramOptions) {
         super(device)
         this._program = null
         this._vertex_shader = null
@@ -79,6 +88,10 @@ export class Program extends RenderingResource {
             if(options.uniform_usage_map) {
                 this._uniform_usage_map = options.uniform_usage_map
             }
+            if(options.compressed){
+                this._vertex_shader_source = decodeShaderSource(this._vertex_shader_source)
+                this._fragment_shader_source = decodeShaderSource(this._fragment_shader_source)
+            }
         }
         this._onDeviceRestored()
     }
@@ -88,9 +101,19 @@ export class Program extends RenderingResource {
 
     // 激活渲染程序
     activate() {
-        const ctx = this._device._ctx
+        const core = this._core
+        const ctx = core._context
         ctx.useProgram(this._program)
-        this._device._current_program = this
+        core._current_program = this
+        const view = core._current_view
+        if(view){
+            this.setUniformMat4(UniformUsage.MAT_PV, view.getViewProjMatrix())
+            this.setUniformMat4(UniformUsage.MAT_VIEW, view.getViewMatrix())
+        }
+        const matworld = core._current_world_matrix
+        if(matworld){
+            this.setUniformMat4(UniformUsage.MAT_WORLD, matworld)
+        }
     }
 
     // 获取uniform变量的位置
@@ -107,73 +130,81 @@ export class Program extends RenderingResource {
         return this._attributes[name]
     }
 
+    getAttributeLocationByUsage(usage: VertexAttributeUsage): number {
+        return this._attribute_usage[usage]
+    }
+
+    setWorldMatrix(value: Float32Array){
+        this.setUniformMat4(UniformUsage.MAT_WORLD, value)
+    }
+
     setUniformMat4(usage: UniformUsage, value: Float32Array) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniformMatrix4fv(loc, false, value)
+        if(loc) this._core._context.uniformMatrix4fv(loc, false, value)
     }
 
     setUniformMat3(usage: UniformUsage, value: Float32Array) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniformMatrix3fv(loc, false, value)
+        if(loc) this._core._context.uniformMatrix3fv(loc, false, value)
     }
 
     setUniformVec4(usage: UniformUsage, value: Float32Array) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniform4fv(loc, value)
+        if(loc) this._core._context.uniform4fv(loc, value)
     }
 
     setUniformVec3(usage: UniformUsage, value: Float32Array) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniform3fv(loc, value)
+        if(loc) this._core._context.uniform3fv(loc, value)
     }
 
     setUniformVec2(usage: UniformUsage, value: Float32Array) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniform2fv(loc, value)
+        if(loc) this._core._context.uniform2fv(loc, value)
     }
 
     setUniformFloat(usage: UniformUsage, value: number) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniform1f(loc, value)
+        if(loc) this._core._context.uniform1f(loc, value)
     }
 
     setUniformInt(usage: UniformUsage, value: number) {
         const loc = this._uniform_usage[usage]
-        if(loc) this._device._ctx.uniform1i(loc, value)
+        if(loc) this._core._context.uniform1i(loc, value)
     }
 
     setUniformIntLoc(loc: WebGLUniformLocation | null, value: number) {
-        if(loc) this._device._ctx.uniform1i(loc, value)
+        if(loc) this._core._context.uniform1i(loc, value)
     }
 
     setUniformFloatLoc(loc: WebGLUniformLocation | null, value: number) {
-        if(loc) this._device._ctx.uniform1f(loc, value)
+        if(loc) this._core._context.uniform1f(loc, value)
     }
 
     setUniformVec2Loc(loc: WebGLUniformLocation | null, value: Float32Array) {
-        if(loc) this._device._ctx.uniform2fv(loc, value)
+        if(loc) this._core._context.uniform2fv(loc, value)
     }
 
     setUniformVec3Loc(loc: WebGLUniformLocation | null, value: Float32Array) {
-        if(loc) this._device._ctx.uniform3fv(loc, value)
+        if(loc) this._core._context.uniform3fv(loc, value)
     }
 
     setUniformVec4Loc(loc: WebGLUniformLocation | null, value: Float32Array) {
-        if(loc) this._device._ctx.uniform4fv(loc, value)
+        if(loc) this._core._context.uniform4fv(loc, value)
     }
 
     setUniformMat3Loc(loc: WebGLUniformLocation | null, value: Float32Array) {
-        if(loc) this._device._ctx.uniformMatrix3fv(loc, false, value)
+        if(loc) this._core._context.uniformMatrix3fv(loc, false, value)
     }
 
     setUniformMat4Loc(loc: WebGLUniformLocation | null, value: Float32Array) {
-        if(loc) this._device._ctx.uniformMatrix4fv(loc, false, value)
+        if(loc) this._core._context.uniformMatrix4fv(loc, false, value)
     }
 
     setUniformByName(name: string, value: any) {
         const loc = this.getUniformLocation(name)
         if(loc){
-            const ctx = this._device._ctx
+            const ctx = this._core._context
             switch (value.constructor) {
                 case Float32Array:
                     ctx.uniformMatrix4fv(loc, false, value)
@@ -192,7 +223,7 @@ export class Program extends RenderingResource {
 
     // 内部方法，编译着色器
     /** @internal */ _compileShader(type: number, source: string): WebGLShader | null {
-        const ctx = this._device._ctx
+        const ctx = this._core._context
         const shader = ctx.createShader(type)
         if(shader){
             ctx.shaderSource(shader, source)
@@ -209,15 +240,15 @@ export class Program extends RenderingResource {
     // 内部方法，设备丢失时调用
     /** @internal */ _onDeviceLost() {
         if(this._program){
-            this._device._ctx.deleteProgram(this._program)
+            this._core._context.deleteProgram(this._program)
             this._program = null
         }
         if(this._vertex_shader){
-            this._device._ctx.deleteShader(this._vertex_shader)
+            this._core._context.deleteShader(this._vertex_shader)
             this._vertex_shader = null
         }
         if(this._fragment_shader){
-            this._device._ctx.deleteShader(this._fragment_shader)
+            this._core._context.deleteShader(this._fragment_shader)
             this._fragment_shader = null
         }
     }
@@ -225,7 +256,7 @@ export class Program extends RenderingResource {
     // 内部方法，设备恢复时调用
     /** @internal */ _onDeviceRestored() {
         if(!this._program){
-            const ctx = this._device._ctx
+            const ctx = this._core._context
             this._program = ctx.createProgram()
             if(this._program){
                 this._vertex_shader = this._compileShader(ctx.VERTEX_SHADER, this._vertex_shader_source)

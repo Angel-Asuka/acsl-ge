@@ -1,0 +1,13 @@
+listen-addr:    0.0.0.0
+listen-port:    22100
+public-url:     ws://127.0.0.1:22100
+
+cs:
+  url:        ws://127.0.0.1:11800/svc
+  id:         1
+  key:        ./key.pem
+
+capacity:       1024
+
+redis:
+  host:         192.168.2.252

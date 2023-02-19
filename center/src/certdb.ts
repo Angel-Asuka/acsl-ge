@@ -56,6 +56,6 @@ export default class CertDB {
     }
 
     sign(data:string){
-        return Crypto.MakeSignature(data, this.mykey, {method:'rsa-sha256'})
+        return Crypto.MakeSignature(data, this.mykey, {method:'rsa-sha256'})!
     }
 }

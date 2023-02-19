@@ -1,54 +1,24 @@
-import { App, CS, Utils, Crypto} from '@acsl/fw'
+import { App, CS, Utils } from "@acsl/fw"
 import CertDB from './certdb.js'
+import { ServiceNode } from "./service-node.js"
+import { AppPool } from "./app-manager.js"
+import { ServicePool } from "./service-manager.js"
 
-declare type AppInstance = {
-    uuid: string,
-    app:  string,
-    node: ServiceNode
-}
-
-// 服务节点
-declare type ServiceNode = {
-    uuid: string,               // 节点ID
-    service: string,            // 服务ID
-    apps: Array<string>,        // 能够提供的应用服务列表
-    capacity: number,           // 容量
-    load: number,               // 负载
-    instances:{[uuid:string]:AppInstance},   // 由该节点构造的应用实例对象
-    conn: CS.Conn               // 对应的连接对象
-}
-
-// 应用数据
-declare type AppInfo = {
-    node_pool: {[uuid:string]:ServiceNode},
-    instances: {[uuid:string]:AppInstance}
-}
-
+// 核心
 export class Core{
-    private http_server: App.Server
-    private ws_server: CS.Server
+
+    private http_server: App.Server                     // HTTP服务
+    private ws_server: CS.Server                        // WebSocket服务
     private cert_db: CertDB
     private auth_timer: Utils.TimeWheel
 
-    private node_map:{[uuid:string]:ServiceNode}                    // 服务结点总表
-    private app_map:{[appid:string]:AppInfo}                        // 应用总表
-    private svc_map:{[svc:string]:{[uuid:string]:ServiceNode}}    // 独立服务表
-    
-    private rpc_route: {[func:string]:(data:any, rpcid:number, conn:CS.Conn)=>void}
-    private cmd_route: {[cmd:string]:(data:any, conn:CS.Conn)=>boolean}
+    _nodes: {[uuid:string]:ServiceNode} = {}    // 服务节点
+    _apps: AppPool                              // 应用池
+    _services: ServicePool                      // 服务池
     
     constructor(app_conf:App.AppConfig, conf:any){
-        this.node_map = {}
-        this.app_map = {}
-        this.svc_map = {}
-
-        this.cmd_route = {
-        }
-
-        this.rpc_route = {
-            "req-svc": this.OnCmdRequestService.bind(this)
-        }
-
+        this._apps = new AppPool(this)
+        this._services = new ServicePool(this)
         this.cert_db = new CertDB(conf.Key, conf.CertPath)
         this.http_server = new App.Server(app_conf)
         this.ws_server = new CS.Server({
@@ -66,18 +36,24 @@ export class Core{
         this.http_server.run()
     }
 
-    private async OnCmdRequestService(data:any, rpcid:number, conn:CS.Conn){
-        if(data && 'svc' in data && data.svc in this.svc_map){
-            //! TODO： 此处可能产生一些性能损耗。当请求量过大的时候，可以考虑采用有序表来加快查找
-            for(let sid in this.svc_map[data.svc]){
-                if(this.svc_map[data.svc][sid].load < this.svc_map[data.svc][sid].capacity){
-                    const ret = await this.svc_map[data.svc][sid].conn.rpc(JSON.stringify({func:'req-svc', data:data}))
-                    conn.endRpc(ret, rpcid)
-                    return
-                }
+    /**
+     * 寻找一个提供指定服务的节点，并向其发起一个Rpc调用
+     * @param data {svc:服务名称, ...}
+     */
+    private async OnRpcReqSvc(data:any, conn:CS.Conn){
+        if(data && data['svc']){
+            const srv = this._services.query(data['svc'])
+            if(srv) return srv.request(data)
+        }
+    }
+
+    private async OnRpcReqComInst(data:any, conn:CS.Conn){
+        if(data){
+            const app = this._apps.query(data['appid'])
+            if(app){
+                return app.requestCommonInstance(data['data'])
             }
         }
-        conn.endRpc(null, rpcid)
     }
 
     // 客户端超时处理
@@ -94,77 +70,40 @@ export class Core{
     // 客户端关闭事件
     private OnWSClosed(conn: CS.Conn, srv: CS.Server){
         this.auth_timer.remove(conn.auth_timout_id)
-        const svc:ServiceNode = conn.svc
-        if(svc){
-            if(svc.service == 'app:container'){
-                for(let i in svc.instances){
-                    if( svc.instances[i].app in this.app_map && i in this.app_map[svc.instances[i].app].instances){
-                        delete this.app_map[svc.instances[i].app].instances[i]  
-                    }
-                }
-                for(let a of svc.apps){
-                    if(a in this.app_map && svc.uuid in this.app_map[a].node_pool)
-                        delete this.app_map[a].node_pool[svc.uuid]
-                }
-            }else{
-                if(svc.service in this.svc_map && svc.uuid in this.svc_map[svc.service]){
-                        delete this.svc_map[svc.service][svc.uuid]
-                }
-            }
-            if(svc.uuid in this.node_map)
-                delete this.node_map[svc.uuid]
+        if(conn.svc){
+            this.removeNode(conn.svc)
         }
     }
 
     // 客户端消息事件
     private OnWSMessage(msg: Buffer, conn: CS.Conn, srv: CS.Server){
         const data = Utils.parseJson(msg.toString())
+        const d = data['data']
         if(data && 'cmd' in data){
             if(conn.auth_info){
-                if(data.cmd in this.cmd_route){
-                    if(this.cmd_route[data.cmd](data, conn))
+                // 已经通过身份验证的客户端，直接进行命令路由
+                const func = `OnCmd${data.cmd}`
+                if(typeof this[func] == 'function'){
+                    this[func](data, conn)
                         return
                 }
-            } else if(data.cmd == 'auth' && 'data' in data && 'id' in data.data && 'nonce' in data.data && 'ts' in data.data && 'sign' in data.data){
-                const cfg = this.cert_db.verify(data.data.id, 'auth', data.data)
+            } else if(data['cmd'] == 'auth' && d && d['id'] != null && d['nonce'] && d['ts'] && d['sign']){
+                // 未通过身份验证的客户端，进行身份验证
+                const cfg = this.cert_db.verify(d['id'], 'auth', d)
                 if(cfg != null){
                     conn.auth_info = cfg
-                    const replay = this.cert_db.sign('auth')
-                    if(replay){
-                        if('service' in data.data && data.data.service != 'none'){
-                            if('service' in cfg && cfg.service == data.data.service){
-                                if(!data.data.apps) data.data.apps = []
-                                if(!data.data.capacity) data.data.capacity = 0
-                                const svc:ServiceNode = {
-                                    uuid: Crypto.uuidHex(),
-                                    service: data.data.service,
-                                    apps: data.data.apps,
-                                    capacity: data.data.capacity,
-                                    load: 0,
-                                    instances: {},
-                                    conn: conn
-                                }
-                                conn.svc = svc
-                                this.node_map[svc.uuid] = svc
-                                if(svc.service == 'app:container'){
-                                    for(let a of svc.apps){
-                                        if(!(a in this.app_map))
-                                            this.app_map[a] = {node_pool:{},instances:{}}
-                                        this.app_map[a].node_pool[svc.uuid] = svc
-                                    }
-                                }else{
-                                    if(!(svc.service in this.svc_map))
-                                        this.svc_map[svc.service] = {}
-                                    this.svc_map[svc.service][svc.uuid] = svc
-                                }
-                            }
-                        }
-                        console.log(`Client connected from ${conn.clientAddress}`)
-                        this.auth_timer.remove(conn.auth_timout_id)
-                        replay.status = 'OK'
-                        conn.send(Buffer.from(JSON.stringify({cmd:'auth',data:replay})))
-                        return
+                    const replay = this.cert_db.sign('auth')    //签一个回复包
+                    if(d['service'] && d['service'] == cfg.service){
+                        // 构造服务节点对象，应用注册将由服务节点对象自行完成
+                        const node = ServiceNode.create(this, conn, d)
+                        conn.svc = node
+                        this.addNode(node)
                     }
+                    console.log(`Client connected from ${conn.clientAddress}`)
+                    this.auth_timer.remove(conn.auth_timout_id)
+                    replay.status = 'OK'
+                    conn.send(Buffer.from(JSON.stringify({cmd:'auth',data:replay})))
+                    return
                 }
             }
         }
@@ -172,13 +111,35 @@ export class Core{
     }
 
     // 客户端远程过程调用事件
-    private OnWSRpc(msg:Buffer, rpcid:number, conn:CS.Conn, srv:CS.Server){
+    // 将消息解析为JSON对象，然后路由到具体的处理函数
+    private async OnWSRpc(msg:Buffer, rpcid:number, conn:CS.Conn, srv:CS.Server){
         try{
             const param = JSON.parse(msg.toString())
-            this.rpc_route[param.func](param.data, rpcid, conn)
+            const func = `OnRpc${param.func}`
+            if(typeof this[func] == 'function'){
+                const ret = await this[func](param.data, rpcid, conn)
+                conn.endRpc(ret, rpcid)
+                return
+            }
         }catch(e){
-            conn.endRpc(null, rpcid)
+            console.log(e)
         }
+        conn.endRpc(null, rpcid)
     }
-    
+
+    // 添加服务节点
+    addNode(n: ServiceNode){
+        this._nodes[n.uuid] = n
+        this._apps.addProvider(n)
+        this._services.addProvider(n)
+    }
+
+    // 删除服务节点
+    removeNode(n: ServiceNode){
+        this._apps.removeProvider(n)
+        this._services.removeProvider(n)
+        delete this._nodes[n.uuid]
+    }
+
+    [k:string]:any
 }

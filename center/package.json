@@ -1,6 +1,6 @@
 {
   "name": "@acsl/ge-center",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "ACSL-GE Center-Server",
   "author": "AngelAsuka",
   "license": "MIT",
@@ -26,6 +26,6 @@
     "@types/ws": "^8.5.3"
   },
   "publishConfig": {
-      "registry": "https://registry.npmjs.org"
+    "registry":"https://registry.npmjs.org"
   }
 }

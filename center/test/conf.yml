@@ -1,0 +1,4 @@
+listen-port:    11800
+service-path:   /svc
+certs-path:     ./auth/
+key:            ./key.pem

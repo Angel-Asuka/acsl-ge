@@ -1,0 +1,9 @@
+FROM nginx:1.23.2 AS buildcert
+RUN openssl genrsa -out /key.pem 2048 && openssl rsa -in /key.pem -pubout -out /pub.pem
+
+FROM node:19-alpine
+WORKDIR /etc/ge-container
+COPY --from=buildcert /key.pem ./private.key
+COPY --from=buildcert /pub.pem ./pub.pem
+RUN mkdir auth && npm install --global @acsl/ge-container@1.0.1
+ENTRYPOINT [ "acsl-ge-container" ]

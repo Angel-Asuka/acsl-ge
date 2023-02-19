@@ -1,6 +1,7 @@
 import { parseArgv } from './utils.js'
 import { printUsage, printVersion } from './usage.js'
 import { ConvertDragonBoneSlice } from './convert/dragonbone-slice.js'
+import { ConvertGLTFMesh } from './convert/gltf.js'
 import * as Compiler from './compiler/compiler.js'
 import path from 'path'
 import fs from 'node:fs'
@@ -19,6 +20,7 @@ const cmdline = parseArgv({
     '-e':'enc',
     '--enc':'enc',
     '--db-slice':'convert-db-slice',
+    '--gltf-mesh':'convert-gltf-mesh',
     '-c': 'compress',
     '-compress': 'compress'
 },{'-h':'printHelp', '-v':'printVersion'},undefined,()=>{printUsage();process.exit()})
@@ -41,6 +43,12 @@ const filepath = path.join(path.resolve(cmdline.dir), cmdline.filename)
 // 转换 DragonBone 的切片贴图
 if('convert-db-slice' in cmdline){
     ConvertDragonBoneSlice(cmdline['convert-db-slice'], cmdline.output, cmdline.name)
+    console.log('Done.')
+    process.exit()
+}
+
+if('convert-gltf-mesh' in cmdline){
+    ConvertGLTFMesh(cmdline['convert-gltf-mesh'], cmdline.output, cmdline.name)
     console.log('Done.')
     process.exit()
 }

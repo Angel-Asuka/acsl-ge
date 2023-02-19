@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ "$1" == '' ] || [ "$1" == 'public' ]; then
+    npm publish
+fi
+sed -i "s/\"registry.*/\"registry\":\"http:\/\/npm.inner:8081\/repository\/private\/\"/g" ./package.json
+if [ "$1" == '' ] || [ "$1" == 'inner' ]; then
+    npm publish
+fi
+sed -i "s/\"registry.*/\"registry\":\"https:\/\/registry.npmjs.org\"/g" ./package.json
