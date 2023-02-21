@@ -49,7 +49,7 @@ export class ServiceNode{
             "Create": this[K_SVC_FUNC_REQ_CREATE].bind(this)    // 请求创建应用实例
         }
 
-        this[K_SVC_ON_REQPROC] = this.onRequest || ((data:any)=>{})
+        this[K_SVC_ON_REQPROC] = cfg.onRequest || ((data:any)=>{})
         this[K_SVC_READY] = false
         this[K_SVC_CCLI] = new CS.Client({
             url: cfg.center_path,
